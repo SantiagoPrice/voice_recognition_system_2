@@ -64,7 +64,6 @@ class BedNode(Node):
     def __init__(self):
         goal = "bed"
         super().__init__('bed_node')
-        self.declare_parameter("GOAL", "")
         self.set_parameters([Parameter('GOAL', Parameter.Type.STRING, goal)])
         self.get_logger().info(f"Declared Parameter 'GOAL' with value: {goal}")
 
@@ -72,20 +71,31 @@ class TableNode(Node):
     def __init__(self):
         goal = "table"
         super().__init__('table_node')
-        self.declare_parameter("GOAL", "")
         self.set_parameters([Parameter('GOAL', Parameter.Type.STRING, goal)])
         self.get_logger().info(f"Declared Parameter 'GOAL' with value: {goal}")
 
+class ParamNode(Node):
+    "Node to declare a parameters"
+    def __init__(self):
+        params = ["GOAL"]
+        for param in params:
+            self.declare_parameter("GOAL", "")
+
 
 #
-def launch_ros_node(node_class):
+def launch_ros_node(node_class,spin=False):
     def target():
         rclpy.init()
         node = node_class()
-        rclpy.spin_once(node, timeout_sec=1.0)
+        if spin:
+            rclpy.spin(node) #keep the node alive
+        else:
+            rclpy.spin_once(node, timeout_sec=1.0)
         node.destroy_node()
         rclpy.shutdown()
     threading.Thread(target=target, daemon=True).start()
+
+
 
 #voice recog
 
@@ -152,6 +162,7 @@ class VoiceAssistantGUI(QWidget):
         self.voice_thread = VoiceRecognitionThread()
         self.voice_thread.detected_word.connect(self.update_label)
         self.voice_thread.start()
+        self.launch_ros_node(ParamNode, spin=True) #initiate parameter node
 
     def initUI(self):
         self.layout = QVBoxLayout()
