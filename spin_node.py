@@ -1,12 +1,4 @@
-import sys
-import os
-import json
-import vosk
-import sounddevice as sd
-import queue
-import threading
 import rclpy
-import time
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 
