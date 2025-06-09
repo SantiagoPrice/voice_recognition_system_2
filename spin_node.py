@@ -7,9 +7,10 @@ class ParamNode(Node):
         super().__init__('param_node')
         self.declare_parameter("GOAL", "")
         
-        
-if __name__ == "__main__":
+def main():
     rclpy.init()
     node = ParamNode()
     rclpy.spin(node)
 
+if __name__ == "__main__":
+    main()
