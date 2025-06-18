@@ -8,7 +8,9 @@ import threading
 import rclpy
 import time
 from rclpy.node import Node
-from rclpy.parameter import Parameter
+from rclpy.parameter import Parameter as RclpyParameter
+from rcl_interfaces.msg import Parameter as MsgParameter, ParameterType, ParameterValue
+from rcl_interfaces.srv import SetParameters
 from vosk import Model, KaldiRecognizer
 from ament_index_python.packages import get_package_share_directory
 
@@ -68,8 +70,20 @@ class TableNode(Node):
     def __init__(self):
         goal = "table"
         super().__init__('table_node')
-        self.declare_parameter("GOAL", "default_value")
-        self.set_parameters([Parameter('GOAL', Parameter.Type.STRING, goal)])
+
+        self.cli = self.create_client(SetParameters, '/param_node/set_parameters')
+    
+        while not self.cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('Waiting for /param_node/set_parameters service...')
+
+
+        param = MsgParameter()
+        param.name = 'GOAL'
+        param.value = ParameterValue(type=ParameterType.PARAMETER_STRING, string_value=goal)
+        req = SetParameters.Request()
+        req.parameters = [param]
+        self.future = self.cli.call_async(req)
+
         self.get_logger().info(f"Declared Parameter 'GOAL' with value: {goal}")
 
 # ROSノード起動関数
