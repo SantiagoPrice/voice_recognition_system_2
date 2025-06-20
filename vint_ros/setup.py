@@ -18,7 +18,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ] + model_files,
-    install_requires=['setuptools'],
+    install_requires=['setuptools','vosk','sounddevice'],
     zip_safe=True,
     maintainer='orin',
     maintainer_email='makino@ai.iit.tsukuba.ac.jp',

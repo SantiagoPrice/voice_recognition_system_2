@@ -11,16 +11,8 @@
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
-  <exec_depend>python-yaml</exec_depend>
-  <exec_depend>python-rclpy</exec_depend>
-  <exec_depend>python-sys</exec_depend>
-  <exec_depend>python-os</exec_depend>
-  <exec_depend>python-json</exec_depend>
-  <exec_depend>python-vosk</exec_depend>
-  <exec_depend>python-sounddevice</exec_depend>
-  <exec_depend>python-queue</exec_depend>
-  <exec_depend>python-threading</exec_depend>
-  <exec_depend>python-time</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>rclpy</exec_depend>
   
   <export>
     <build_type>ament_python</build_type>

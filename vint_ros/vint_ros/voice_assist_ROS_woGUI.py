@@ -24,7 +24,7 @@ COMMAND_LIST = [
     "table - move to the table"
 ]
 
-MODEL_PATH = ("/home/orin/ros2_ws/src/vint_ros/vosk-model")
+MODEL_PATH = ("./src/vint_ros/vosk-model")
 model = Model(MODEL_PATH)
 
 q = queue.Queue()
