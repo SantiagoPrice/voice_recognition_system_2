@@ -7,3 +7,6 @@ rosdep install --from-path vint_ros --ignore-src -r -y
 Building package:
 cd ..
 colcon build --packages-select vint_ros
+
+
+Model sources: https://alphacephei.com/vosk/models
