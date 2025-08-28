@@ -13,7 +13,7 @@ from rclpy.node import Node
 from rclpy.parameter import Parameter as RclpyParameter
 from rcl_interfaces.msg import Parameter as MsgParameter, ParameterType, ParameterValue
 from rcl_interfaces.srv import SetParameters
-from vosk import Model, KaldiRecognizer
+from vosk import Model, KaldiRecognizer , GpuInit
 from ament_index_python.packages import get_package_share_directory
 
 # コマンドリスト
@@ -26,8 +26,14 @@ COMMAND_LIST = [
     "table - move to the table"
 ]
 
-#MODEL_PATH = ("/home/orin/ros2_ws/src/vint_ros/vosk-model")
-MODEL_PATH = ("/home/orin/ros2_ws/src/vint_ros/vosk-model-lm/vosk-model-en-us-0.22")
+
+GpuInit()
+
+print([os.path.join(os.getcwd(),"/src/vint_ros/vosk-model")])
+
+#MODEL_PATH ="./src/vint_ros/vosk-model"# ("/home/orin/ros2_ws/src/vint_ros/vosk-model")
+#MODEL_PATH = "./src/vint_ros/vosk-model_big"
+MODEL_PATH = "/workspaces/isaac_ros-dev/isaac_ros_assets/models/vosk/vosk-model_big"
 model = Model(MODEL_PATH)
 
 #API key and URL
@@ -74,45 +80,60 @@ class ShutdownNode(Node):
 
 class BedNode(Node):
     def __init__(self):
-        goal = "bed"
+        goal = "59"
         super().__init__('bed_node')
         print("Started BedNode") 
 
-        self.cli = self.create_client(SetParameters, '/param_node/set_parameters')
-    
-        """
-        while not self.cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('Waiting for /param_node/set_parameters service...')
-        """
+        self.cli_tr = self.create_client(SetParameters, '/p1_trig_vint_node/set_parameters')
+        self.cli_par = self.create_client(SetParameters, '/tracker_with_cloud_node/set_parameters')
+
+        while not self.cli_par.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('Waiting for /p1_trig_vint_node/set_parameters service...')
+        
+        while not self.cli_tr.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('Waiting for /tracker_with_cloud_node/set_parameters service...')
+
 
         param = MsgParameter()
         param.name = 'GOAL'
         param.value = ParameterValue(type=ParameterType.PARAMETER_STRING, string_value=goal)
         req = SetParameters.Request()
         req.parameters = [param]
-        self.future = self.cli.call_async(req)
+        self.future = self.cli_par.call_async(req)
+        
+        param.name = 'goal_trigg'
+        param.value = ParameterValue(type=ParameterType.PARAMETER_BOOL, bool_value=True)
+        self.future = self.cli_tr.call_async(req)
+
 
         self.get_logger().info(f"Declared Parameter 'GOAL' with value: {goal}")
 
 class TableNode(Node):
     def __init__(self):
-        goal = "table"
+        goal = "60"
         super().__init__('table_node')
         print("Started TableNode") 
             
-        self.cli = self.create_client(SetParameters, '/param_node/set_parameters')
+        self.cli_tr = self.create_client(SetParameters, '/p1_trig_vint_node/set_parameters')
+        self.cli_par = self.create_client(SetParameters, '/tracker_with_cloud_node/set_parameters')
+
         
-        """
-        while not self.cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('Waiting for /param_node/set_parameters service...')
-        """
+        while not self.cli_par.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('Waiting for /p1_trig_vint_node/set_parameters service...')
+        
+        while not self.cli_tr.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('Waiting for /tracker_with_cloud_node/set_parameters service...')
 
         param = MsgParameter()
         param.name = 'GOAL'
         param.value = ParameterValue(type=ParameterType.PARAMETER_STRING, string_value=goal)
         req = SetParameters.Request()
         req.parameters = [param]
-        self.future = self.cli.call_async(req)
+        self.future = self.cli_par.call_async(req)
+
+        param.name = 'goal_trigg'
+        param.value = ParameterValue(type=ParameterType.PARAMETER_BOOL, bool_value=True)
+        self.future = self.cli_tr.call_async(req)
 
         self.get_logger().info(f"Declared Parameter 'GOAL' with value: {goal}")
 
@@ -140,12 +161,14 @@ class VoiceRecognition:
         #device_info = sd.query_devices(None, "input")
         #print(f"Default input device: {device_info['name']}")
         #print(f"Default sample rate: {device_info['default_samplerate']} Hz")
-        #samplerate = int(sd.query_devices(None, "input")["default_samplerate"])
-        samplerate = 16000
-        with sd.RawInputStream(samplerate=samplerate, blocksize=16000, dtype="int16",
-                               channels=1, callback=audio_callback, device=None):
+        samplerate = int(sd.query_devices(None, "input")["default_samplerate"])
+        print(f"actual sample rate is {samplerate}")
+        #samplerate2 = 16000
+        with sd.RawInputStream(samplerate=samplerate, blocksize=int(samplerate*1), dtype="int16",
+                               channels=1, callback=audio_callback, device=24):
             rec = vosk.KaldiRecognizer(model, samplerate)
             print("Listening for wake word...")
+            self.read=False
 
             while True:
                 if self.stop == True:
@@ -157,19 +180,25 @@ class VoiceRecognition:
                 #print("time1:",time_diff)
 
                 audio_np = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
-                volume = np.sqrt(np.mean(audio_np**2))  # RMSボリューム
+                volume =  max(np.abs(audio_np))#np.sqrt(np.mean(audio_np**2))  # RMSボリューム
 
             
                 # 閾値以下ならvoskに渡さない
-                if volume < 0.01:
+                if volume < 0.3:
                     if self.listening_for_command  == True:
                         print("Listening...")
                     else:
-                        print("Listening for wake word...")
-                    continue
+                     print("Listening for wake word...")
+                     #continue
+                else:
+                    self.read=True
+                    print(f"Volume: {volume:.4f}")
                 
+                if not self.read:
+                    continue
 
                 if rec.AcceptWaveform(data):
+                    self.read=False
                     result = json.loads(rec.Result())
                     text = result.get("text", "").strip().lower()
                     #print("time2:",time_diff)
@@ -189,6 +218,9 @@ class VoiceRecognition:
                             self.listening_for_command = False
                             if self.flag == 1:
                                 print("Listening...")
+                else:
+                    partial_result = json.loads(rec.PartialResult())
+                    print(f"Partial: {partial_result.get('partial', '')}")
 
     def LLM(self, text):
         base_prompt = """
@@ -209,10 +241,11 @@ class VoiceRecognition:
 
         """
 
-        text = input("test sentence: ")
-        print(text)
+        #text = input("test sentence: ")
+        
         #text = "I am hungry"
         prompt = base_prompt + text
+        print(prompt)
         data = {
                 "model": "google/gemma-3n-e4b-it:free",
                 "messages": [{"role": "user", "content": prompt}]
