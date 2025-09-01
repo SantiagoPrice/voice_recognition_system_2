@@ -31,13 +31,14 @@ GpuInit()
 
 print([os.path.join(os.getcwd(),"/src/vint_ros/vosk-model")])
 
-#MODEL_PATH ="./src/vint_ros/vosk-model"# ("/home/orin/ros2_ws/src/vint_ros/vosk-model")
+MODEL_PATH ="/home/orin/voice_recognition_system/vosk-model-lm/vosk-model-en-us-0.22"# ("/home/orin/ros2_ws/src/vint_ros/vosk-model")
 #MODEL_PATH = "./src/vint_ros/vosk-model_big"
-MODEL_PATH = "/workspaces/isaac_ros-dev/isaac_ros_assets/models/vosk/vosk-model_big"
 model = Model(MODEL_PATH)
 
 #API key and URL
 API_KEY = ' '
+#API_KEY = ' '
+#API_KEY = ' '
 API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 # Define the headers for the API request
@@ -165,7 +166,7 @@ class VoiceRecognition:
         print(f"actual sample rate is {samplerate}")
         #samplerate2 = 16000
         with sd.RawInputStream(samplerate=samplerate, blocksize=int(samplerate*1), dtype="int16",
-                               channels=1, callback=audio_callback, device=24):
+                               channels=1, callback=audio_callback, device=None):
             rec = vosk.KaldiRecognizer(model, samplerate)
             print("Listening for wake word...")
             self.read=False
@@ -209,7 +210,8 @@ class VoiceRecognition:
                         print(f"(Detected: {text})")
                         if not self.listening_for_command and self.flag != 1:
                             if self.wake_word in text:
-                                print("Assistant: Hello. What can I help you?")
+                                #self.LLM(text)
+                                self.voice_feedback(text)
                                 self.listening_for_command = True
                         else:
                             self.stop = True
@@ -222,8 +224,18 @@ class VoiceRecognition:
                     partial_result = json.loads(rec.PartialResult())
                     print(f"Partial: {partial_result.get('partial', '')}")
 
+    def voice_feedback(self, text):
+        if text == "assistant":
+            print("Hello, How can I help you.")
+        else:
+            print("Listening...")
+            partial_result = json.loads(rec.PartialResult())
+            print(f"Partial: {partial_result.get('partial', '')}")
+
+
     def LLM(self, text):
-        base_prompt = """
+        #base_prompt =
+        """
         You are an assistant AI with a power wheelchair.
         Please adhere to the following conditions and return output.
 
@@ -241,8 +253,23 @@ class VoiceRecognition:
 
         """
 
-        #text = input("test sentence: ")
-        
+        base_prompt = """
+        You are a friendly AI assistant built into an electric wheelchair used in a bedroom. 
+        The room has destinations: 
+        - bed
+        - table. 
+        When the user speaks, always respond in one short, natural English sentence that clearly includes the destination.
+        Do not ask questions. Instead, acknowledge the user’s state in a warm way and declare the action to move to the destination. 
+        The response should sound natural when read aloud by a speaker. 
+        If you get the word "assistant" from the User, you have to response "Hello, How can I help you."
+        Examples: 
+        User: “I’m hungry.” 
+        Assistant: “Alright, let’s move to the table so you can eat.” 
+        User: “I’m sleepy.” 
+        Assistant: “Got it, heading to the bed now.”
+
+        User: 
+        """
         #text = "I am hungry"
         prompt = base_prompt + text
         print(prompt)
@@ -251,6 +278,7 @@ class VoiceRecognition:
                 "messages": [{"role": "user", "content": prompt}]
                 }
         response = requests.post(API_URL, json=data, headers=headers)
+        print(response)
         result = response.json()
         #print(result)
         output = result['choices'][0]['message']['content']
