@@ -9,6 +9,7 @@ import rclpy
 import requests
 import time
 import numpy as np
+import pyttsx3
 from rclpy.node import Node
 from rclpy.parameter import Parameter as RclpyParameter
 from rcl_interfaces.msg import Parameter as MsgParameter, ParameterType, ParameterValue
@@ -36,10 +37,14 @@ MODEL_PATH ="/home/orin/voice_recognition_system/vosk-model-lm/vosk-model-en-us-
 model = Model(MODEL_PATH)
 
 #API key and URL
+#API_KEY = ' '
 API_KEY = ' '
-#API_KEY = ' '
-#API_KEY = ' '
 API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+
+#pyttsx3 srttings
+engine = pyttsx3.init()
+engine.setProperty("rate", 150)
+engine.setProperty("volume", 1.0)
 
 # Define the headers for the API request
 headers = {
@@ -204,7 +209,7 @@ class VoiceRecognition:
                     text = result.get("text", "").strip().lower()
                     #print("time2:",time_diff)
                     #text = "assistant"
-                    #text = input("test sentence: ")
+                    text = input("test sentence: ")
                     print(f"audio recording: {text}")
                     if text:
                         print(f"(Detected: {text})")
@@ -227,6 +232,8 @@ class VoiceRecognition:
     def voice_feedback(self, text):
         if text == "assistant":
             print("Hello, How can I help you.")
+            engine.say("Hello, How can I help you.")
+            engine.runAndWait()
         else:
             print("Listening...")
             partial_result = json.loads(rec.PartialResult())
@@ -283,6 +290,8 @@ class VoiceRecognition:
         #print(result)
         output = result['choices'][0]['message']['content']
         print("Assistant:", output)
+        engine.say(output)
+        engine.runAndWait()
         return output
 
     def process_command(self, output):
