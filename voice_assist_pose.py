@@ -46,6 +46,7 @@ headers = {
 
 q = queue.Queue()
 #---------------------------------------------------
+# This section belong to the perception node
 robot_x = 1.5
 robot_y = 4.5
 robot_yaw_deg = 270.0
@@ -149,7 +150,7 @@ def spin_rviz(node):
 
 ############################################################################
 
-# voice_recognition
+# voice_recognition is divided into two nodes: Vosk node and task manager node
 class VoiceRecognition(Node):
     def __init__(self):
         super().__init__("voice")
@@ -159,6 +160,7 @@ class VoiceRecognition(Node):
         self.flag = 0
         print("===================================================")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # This part belongs to the Vosk node
     def run(self, edges):
         samplerate = int(sd.query_devices(None, "input")["default_samplerate"])
         print(f"actual sample rate is {samplerate}")
@@ -194,25 +196,14 @@ class VoiceRecognition(Node):
                     #text = result.get("text", "").strip().lower()
                     text = input("test sentence: ")
                     print(f"audio recording: {text}")
-                    if not text == "assistant":
-                        text += "_pose/selection"
+
                     if text:
+                        # publish text without the word assistant under the topic name /command
+                        # The task manager node continues below
+                            # The node subcribes to /edge_list and /command
                         if text.split("_")[-1] == "pose/selection":
                             #output = self.LLM_edge_case1(text.split("_")[0], edges)
                             output = input("edge:")
-                            global table_x
-                            global table_y 
-                            global table_yaw_rad
-                            table_x = random.uniform(2,15)
-                            table_y = random.uniform(2,15)
-                            #table_yaw_rad = math.radians(random.uniform(0,360))
-                            global corners
-                            corners = [
-                                    ((table_x + table_hsize_x), (table_y + table_hsize_y), table_size_z),
-                                    ((table_x - table_hsize_x), (table_y + table_hsize_y), table_size_z),
-                                    ((table_x - table_hsize_x), (table_y - table_hsize_y), table_size_z),
-                                    ((table_x + table_hsize_x), (table_y - table_hsize_y), table_size_z)
-                                    ]
 
                             self.voice_feedback(output)
                             global edge_flag
@@ -220,13 +211,15 @@ class VoiceRecognition(Node):
                             self.result_edge(output, edges)
                         print(f"(Detected: {text})")
                         if not self.listening_for_command and self.flag != 1:
+
+                        #We skip the wake word identification    
                             if self.wake_word in text:
                                 #self.LLM(text)
                                 self.response(text)
                                 self.listening_for_command = True
                         elif edge_flag == 0:
                             self.stop = True
-                            output = self.LLM(text)
+                            output = self.LLM(text)   #Lets use a unique LLM function for every scenario
                             self.voice_feedback(output)
                             self.process_command(output)
                             self.listening_for_command = False
@@ -571,6 +564,8 @@ class MapBroadcaster(Node):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #------pose selection------------
+    # This will belong to the edge labeling node. 
+    # Pose selection is a callback function that is called when /table_market is received. This function publishes the variable edges under the topic name /edges_list
     def PoseSelection(self):
         #distance between robot and table
         Pc = np.array([robot_x - table_x, robot_y - table_y])
@@ -651,7 +646,7 @@ class MapBroadcaster(Node):
             edge_4 = "Near left edge"
         
         print(edge_1, edge_2, edge_3, edge_4, sep="\n")
-        edges = np.array([edge_1, edge_2, edge_3, edge_4])
+        edges = np.array([edge_1, edge_2, edge_3, edge_4]) #publish this
         return(edges)
 
 ##############################################################
