@@ -31,8 +31,8 @@ from datetime import datetime
 GpuInit()
 
 #--------------------------------------------------
-MODEL_PATH = "/home/orin/voice_recognition_system/vosk-model-lm/vosk-model-en-us-0.22"
-model = Model(MODEL_PATH)
+#MODEL_PATH = "/home/orin/voice_recognition_system/vosk-model-lm/vosk-model-en-us-0.22"
+#model = Model(MODEL_PATH)
 
 API_KEY = ' '
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -186,7 +186,20 @@ req_NearLeft = ["I want the near left spot",
 	"This spot feels right"
         ]       
        
+req_false_case1 = ["This orientation feels right",
+        "This side feels more natural"
+        ]
+label_false_case1 = [2, 0]
 
+req_false_case2 = ["I’d like to shift back and orient right",
+        "This general area feels comfortable",
+        "I can naturally face that side",
+        "This spot feels right",
+        "I want to sit closer on the right side",
+        "I feel more stable in that direction",
+        "That area feels right"
+        ]
+label_false_case2 = [5, 4, 4, 7, 4, 5, 6]
 
 ############################################################################
 
@@ -199,6 +212,10 @@ class VoiceRecognition():
         a = 100
         true = 0
         false = 0 
+        idk = 0
+        fc_8 = 0
+        fc_9 = 0
+        TF = "origin"
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"prompt_test_{timestamp}.xlsx"
         header = ["Scenario", "Answer Label", "Request", "LLM Output", "Judged Label", "True/False"]
@@ -214,6 +231,13 @@ class VoiceRecognition():
             print(i+1)
             scen_num = random.randint(0, 7)
             req_number = random.randint(0, 9)
+            """
+            if i % 2 == 0:
+                scen_num = 8
+            elif i % 2 == 1:
+                scen_num = 9
+            """
+
             if scen_num == 0:
                 text = req_Near[req_number]
             elif scen_num == 1:
@@ -230,6 +254,20 @@ class VoiceRecognition():
                 text = req_FarLeft[req_number]
             elif scen_num == 7:
                 text = req_NearLeft[req_number]
+            """
+            elif scen_num == 8:
+                fc_8 += 1
+                req_number = fc_8 % 2
+                #req_number = random.randint(0, 1)
+                scen_num = label_false_case1[req_number]
+                text = req_false_case1[req_number]
+            elif scen_num == 9:
+                fc_9 += 1
+                req_number = fc_9 % 7
+                #req_number = random.randint(0, 6)
+                scen_num = label_false_case2[req_number]
+                text = req_false_case2[req_number]
+            """
 
             answer = scen_num
             if scen_num < 4:
@@ -248,18 +286,28 @@ class VoiceRecognition():
                 true += 1
                 print("TRUE")
                 TF = "True"
-            if not edge_num == scen_num:
+                judged_label = labels[edge_num]
+            elif edge_num == 99:
+                print(text)
+                print(labels[scen_num])
+                idk += 1
+                print("IDK")
+                judged_label = "IDK"
+                TF = "IDK"
+            if not edge_num == scen_num and not TF == "IDK":
                 false += 1
                 count_false[scen_num] += 1
                 print(text)
                 print(labels[scen_num])
                 print("FALSE")
                 TF = "False"
+                judged_label = labels[edge_num]
 
             accuracy = (true / (i+1)) * 100
             print(accuracy, "%")
-            print(count_false)
-            ws.append([scenario, labels[scen_num], text, output, labels[edge_num], TF])
+            print("False count list: ", count_false)
+            print("IDK count: ", idk)
+            ws.append([scenario, labels[scen_num], text, output, judged_label, TF])
 
             wb.save(filename)
 
@@ -268,17 +316,31 @@ class VoiceRecognition():
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def LLM_edge_case1(self, text):
-        base_prompt = """You are an assistant AI mounted on a wheelchair.
-        You are currently near a table, and there are four possible positions around it:
-        "Near Edge"
-        "Far Edge"
-        "Right Edge"
-        "Left Edge"
-        Near edge is the edge which is most close to wheelchair. 
-        When the user makes a request, determine the most suitable position based on their intent. 
-        Respond in a polite and natural tone as an assistant AI. 
-        Your response must include the label of the selected position (e.g., “Far edge”). 
-        Please response with just one or two sentences. 
+        base_prompt = """
+        You are an assistant AI mounted on a wheelchair.
+
+        You are currently near a rectangular table, and there are four possible positions around it:
+            - Near Edge – the side of the table closest to the wheelchair
+            - Far Edge – the side farthest from the wheelchair
+            - Right Edge – the right side of the table relative to the wheelchair’s forward direction
+            - Left Edge – the left side of the table relative to the wheelchair’s forward direction
+
+        When the user makes a request, determine the most suitable position only if you can identify it with complete certainty.
+
+        Certainty rules:
+        You must be certain only when the request includes:
+            - Explicit directional information (e.g., "right", "left", "closest", "far", "back", "front")
+            - Unambiguous spatial relationships that match exactly one of the four positions
+
+        If two or more interpretations are possible, or if the information is incomplete, respond “I don't know.”
+        Do not infer or guess based on assumptions or probability.
+
+        Output rules:
+        Your response must:
+            1. Be one or two polite English sentences as if speaking to the user.
+            2. Include exactly one of the following labels: “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”, or “I don't know”.
+            3. Never include more than one label.
+            4. If uncertain, output exactly 'I don't know.'
 
         User request:
         """
@@ -297,19 +359,33 @@ class VoiceRecognition():
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def LLM_edge_case2(self, text):
-        base_prompt = """You are an assistant AI mounted on a wheelchair.
-        You are currently near a table, and there are four possible positions around it:
-        "Near Right Edge"
-        "Far Right Edge"
-        "Far Left Edge"
-        "Near Left Edge"
-        Near edge is the edge which is most close to wheelchair. 
-        When the user makes a request, determine the most suitable position based on their intent. 
-        Respond in a polite and natural tone as an assistant AI. 
-        Your response must include the label of the selected position (e.g., “Near Right Edge”). 
-        Please response with just one or two sentences. 
+        base_prompt = """        
+        You are an assistant AI mounted on a wheelchair.
+
+        You are currently near a rectangular table, and there are four possible positions around it:r
+                - Near Right Edge – The table edge extending to the right from the corner directly in front of you. It is the closest right-side edge from your perspective.
+                - Far Right Edge – The edge opposite the Near Left Edge, located on the far right side of the table. It is the far, right-back edge from your perspective.
+                - Far Left Edge – The edge opposite the Near Right Edge, located on the far left side of the table. It is the far, left-back edge from your perspective.
+                - Near Left Edge – The table edge extending to the left from the corner directly in front of you. It is the closest left-side edge from your perspective.
+        When the user makes a request, determine the most suitable position only if you can identify it with complete certainty.
+
+        Certainty rules:
+        You must be certain only when the request includes:
+            - Explicit directional information (e.g., "right", "left", "closest", "far", "back", "front")
+            - Unambiguous spatial relationships that match exactly one of the four positions
+
+        If two or more interpretations are possible, or if the information is incomplete, respond “I don't know.”
+        Do not infer or guess based on assumptions or probability.
+
+        Output rules:
+        Your response must:
+            1. Be one or two polite English sentences as if speaking to the user.
+            2. Include exactly one of the following labels: “Near Right Edge”, “Far Right Edge”, “Near Left Edge”, “Far Left Edge”, or “I don't know”.
+            3. Never include more than one label.
+            4. If uncertain, output exactly 'I don't know.'
 
         User request:
+
         """
         prompt = base_prompt + text
         #print(prompt)
@@ -332,6 +408,11 @@ class VoiceRecognition():
                 edge_number = m
                 print(edges[m])
                 continue
+            elif "I don't know" in output:
+                edge_number = 99
+                print("could not decide edge")
+                continue
+        print(edge_number)
         return edge_number
 
 ##############################################################
