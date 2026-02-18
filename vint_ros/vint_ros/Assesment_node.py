@@ -187,8 +187,8 @@ class Assessment(Node):
         values = Float32MultiArray()
         self.goal_num = random.randint(1, 4)
         while True:
-            self.robot_x = round(random.uniform(-3, 3), 1)
-            self.robot_y = round(random.uniform(-3, 3), 1)
+            self.robot_x = round(random.uniform(0, 5), 1)
+            self.robot_y = round(random.uniform(0, 5), 1)
             self.robot_yaw = round(random.uniform(0, 359), 1)
             if (abs(self.robot_x) > 1.0) and (abs(self.robot_y) > 1.0):
                 break
@@ -279,6 +279,11 @@ class Assessment(Node):
         wb.save(self.filename)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def quat_to_yaw(self, qx, qy, qz, qw):
+            siny_cosp = 2.0 * (qw*qz + qx*qy)
+            cosy_cosp = 1.0 - 2.0 * (qy*qy + qz*qz)
+            return math.atan2(siny_cosp, cosy_cosp)
+
     def publish_arrow_marker(self):
         # ----- arrow ------#
         now = self.get_clock().now().to_msg()
@@ -288,6 +293,12 @@ class Assessment(Node):
         table_x, table_y, table_z = self.state["table"]["pos"]
         table_size_x, table_size_y, table_size_z = self.state["table"]["size"]
         table_qx, table_qy, table_qz, table_qw = self.state["table"]["quat"]
+        table_yaw=self.quat_to_yaw(table_qx, table_qy, table_qz, table_qw) *(-1)
+        c, s = math.cos(table_yaw), math.sin(table_yaw)
+        b=table_x/2
+        h=table_y/2
+
+
 
         arrow = Marker()
         arrow.header.frame_id = "map"
@@ -304,32 +315,32 @@ class Assessment(Node):
         offset_start = offset_end + 0.7
 
         if self.goal_num == 1:
-            end.x = table_x + (table_size_x / 2) + offset_end
-            end.y = table_y
+            end.x = table_x + ((table_size_x / 2) + offset_end)*c
+            end.y = table_y + ((table_size_x / 2) + offset_end)*(-s)
             end.z = table_z
-            start.x = table_x + (table_size_x / 2) + offset_start
-            start.y = table_y
+            start.x = table_x + ((table_size_x / 2) + offset_start)*c
+            start.y = table_y + ((table_size_x / 2) + offset_start)*(-s)
             start.z = table_z
         if self.goal_num == 3:
-            end.x = table_x - (table_size_x / 2) - offset_end
-            end.y = table_y
+            end.x = table_x - ((table_size_x / 2) + offset_end) * c
+            end.y = table_y - ((table_size_x / 2) + offset_end) *(-s)
             end.z = table_z
-            start.x = table_x - (table_size_x / 2) - offset_start
-            start.y = table_y
+            start.x = table_x - ((table_size_x / 2) + offset_start)*c
+            start.y = table_y - ((table_size_x / 2) + offset_start)*(-s)
             start.z = table_z
         if self.goal_num == 4:
-            end.x = table_x
-            end.y = table_y + (table_size_y / 2) + offset_end
+            end.x = table_x + ((table_size_y / 2) + offset_end)*s
+            end.y = table_y + ((table_size_y / 2) + offset_end)*c
             end.z = table_z
-            start.x = table_x
-            start.y = table_y + (table_size_y / 2) + offset_start
+            start.x = table_x + ((table_size_y / 2) + offset_start)*s
+            start.y = table_y + ((table_size_y / 2) + offset_start)*c
             start.z = table_z
         if self.goal_num == 2:
-            end.x = table_x
-            end.y = table_y - (table_size_y / 2) - offset_end
+            end.x = table_x - ((table_size_y / 2) + offset_end)*s
+            end.y = table_y - ((table_size_y / 2) + offset_end)*c
             end.z = table_z
-            start.x = table_x
-            start.y = table_y - (table_size_y / 2) - offset_start
+            start.x = table_x - ((table_size_y / 2) + offset_start)*s
+            start.y = table_y - ((table_size_y / 2) + offset_start)*c
             start.z = table_z
 
         arrow.points = [start, end]
