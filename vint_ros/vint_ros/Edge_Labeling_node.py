@@ -118,7 +118,7 @@ class EdgeLabeling(Node):
 
     def calc_once(self):
         if self.have_all():
-            self.edge_world()
+            #self.edge_world(
             self.PoseSelection()
 
     # ------------------------------------------------
@@ -191,20 +191,20 @@ class EdgeLabeling(Node):
         THETA_A = 15.0
 
         if sorted_corner[0][1] < THETA_A:
-            labels = ["Near left edge",
-                      "Near right edge",
-                      "Far right edge",
-                      "Far left edge"]
+            labels = ["Near Left Edge",
+                      "Near Right Edge",
+                      "Far Right Edge",
+                      "Far Left Edge"]
         elif sorted_corner[3][1] < (360.0 - THETA_A):
-            labels = ["Near edge",
-                    "Right edge",
-                    "Far edge",
-                    "Left edge"]
+            labels = ["Near Edge",
+                    "Right Edge",
+                    "Far Edge",
+                    "Left Edge"]
         else:
-            labels = ["Near right edge",
-                      "Far right edge",
-                      "Far left edge",
-                      "Near left edge"]
+            labels = ["Near Right Edge",
+                      "Far Right Edge",
+                      "Far Left Edge",
+                      "Near Left Edge"]
 
         semantic_map = {}
         for phys, label in zip(order, labels):

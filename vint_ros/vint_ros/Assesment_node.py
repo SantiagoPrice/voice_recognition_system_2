@@ -187,10 +187,10 @@ class Assessment(Node):
         values = Float32MultiArray()
         self.goal_num = random.randint(1, 4)
         while True:
-            self.robot_x = round(random.uniform(0, 5), 1)
+            self.robot_x = 0.0 #round(random.uniform(0, 5), 1)
             self.robot_y = round(random.uniform(0, 5), 1)
-            self.robot_yaw = round(random.uniform(0, 359), 1)
-            if (abs(self.robot_x) > 1.0) and (abs(self.robot_y) > 1.0):
+            self.robot_yaw = round(random.uniform(-45, 45), 1)
+            if (abs(self.robot_x) > 1.0) or (abs(self.robot_y) > 1.0):
                 break
         self.get_logger().info("------ Robot position is updated ------")
         self.get_logger().info(f"robot_x: {self.robot_x}")
@@ -265,7 +265,7 @@ class Assessment(Node):
             return
 
         if self.goal_num < 0 or self.goal_num >= len(edges_split):
-            self.get_logger.info("(((gola_num out of range)))")
+            self.get_logger().info("(((gola_num out of range)))")
             return
 
         return self.out_edge
@@ -313,34 +313,36 @@ class Assessment(Node):
 
         offset_end = 0.2
         offset_start = offset_end + 0.7
+        
+        goal_num_local = 5 - self.goal_num
 
-        if self.goal_num == 1:
-            end.x = table_x + ((table_size_x / 2) + offset_end)*c
-            end.y = table_y + ((table_size_x / 2) + offset_end)*(-s)
+        if goal_num_local == 1:
+            end.x = table_x + ((table_size_x / 2) + offset_end)
+            end.y = table_y 
             end.z = table_z
-            start.x = table_x + ((table_size_x / 2) + offset_start)*c
-            start.y = table_y + ((table_size_x / 2) + offset_start)*(-s)
+            start.x = table_x + ((table_size_x / 2) + offset_start)
+            start.y = table_y
             start.z = table_z
-        if self.goal_num == 3:
-            end.x = table_x - ((table_size_x / 2) + offset_end) * c
-            end.y = table_y - ((table_size_x / 2) + offset_end) *(-s)
+        if goal_num_local == 3:
+            end.x = table_x - ((table_size_x / 2) + offset_end)
+            end.y = table_y
             end.z = table_z
-            start.x = table_x - ((table_size_x / 2) + offset_start)*c
-            start.y = table_y - ((table_size_x / 2) + offset_start)*(-s)
+            start.x = table_x - ((table_size_x / 2) + offset_start)
+            start.y = table_y
             start.z = table_z
-        if self.goal_num == 4:
-            end.x = table_x + ((table_size_y / 2) + offset_end)*s
-            end.y = table_y + ((table_size_y / 2) + offset_end)*c
+        if goal_num_local == 4:
+            end.x = table_x 
+            end.y = table_y + ((table_size_y / 2) + offset_end)
             end.z = table_z
-            start.x = table_x + ((table_size_y / 2) + offset_start)*s
-            start.y = table_y + ((table_size_y / 2) + offset_start)*c
+            start.x = table_x
+            start.y = table_y + ((table_size_y / 2) + offset_start)
             start.z = table_z
-        if self.goal_num == 2:
-            end.x = table_x - ((table_size_y / 2) + offset_end)*s
-            end.y = table_y - ((table_size_y / 2) + offset_end)*c
+        if goal_num_local == 2:
+            end.x = table_x
+            end.y = table_y - ((table_size_y / 2) + offset_end)
             end.z = table_z
-            start.x = table_x - ((table_size_y / 2) + offset_start)*s
-            start.y = table_y - ((table_size_y / 2) + offset_start)*c
+            start.x = table_x
+            start.y = table_y - ((table_size_y / 2) + offset_start)
             start.z = table_z
 
         arrow.points = [start, end]
