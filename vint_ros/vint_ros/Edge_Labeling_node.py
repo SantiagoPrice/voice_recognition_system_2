@@ -23,6 +23,8 @@ class EdgeLabeling(Node):
 
         self.latest_edge_text = None
         self.edge_ready = False
+        
+        self.rotated_world_edge = {}
 
         # ===== 絶対エッジ番号（テーブル中心基準）=====
         self.fixed_edges = {
@@ -41,8 +43,44 @@ class EdgeLabeling(Node):
             lambda msg: self.cb_marker(msg, "table"), 10)
 
         self.pub_timer = self.create_timer(1.0, self.publish_edge)
-
     # ------------------------------------------------
+
+    def edge_world(self):
+        table_x, table_y, _ = self.state["table"]["pos"]
+        table_x_size, table_y_size, _ = self.state["table"]["size"]
+        tqx, tqy, tqz, tqw = self.state["table"]["quat"]
+        yaw = self.quat_to_yaw(tqx, tqy, tqz, tqw)
+
+        hx, hy = table_x_size / 2.0, table_y_size / 2.0
+
+        for n in range(4):
+            if n == 0:
+                local_x, local_y = hx, 0.0
+            if n == 1:
+                local_x, local_y = 0.0, hy
+            if n == 2:
+                local_x, local_y = -hx, 0.0
+            if n == 3:
+                local_x, local_y = 0.0, -hy
+            self.rotated_world_edge[n] = np.array(self.rotate_world_angle(local_x, local_y, yaw, table_x, table_y))
+        
+        self.fixed_edges = {
+            "edge_1": np.array([self.rotated_world_edge[0][0], self.rotated_world_edge[0][1]]),
+            "edge_2": np.array([self.rotated_world_edge[1][0], self.rotated_world_edge[1][1]]),
+            "edge_3": np.array([self.rotated_world_edge[2][0], self.rotated_world_edge[2][1]]),
+            "edge_4": np.array([self.rotated_world_edge[3][0], self.rotated_world_edge[3][1]]),
+            }
+
+    def rotate_world_angle(self, x, y, yaw, table_x, table_y):
+        c, s = math.cos(yaw), math.sin(yaw)
+        rotated_x = x * c - y * s
+        rotated_y = x * s + y * c
+        table_world_x = rotated_x + table_x
+        table_world_y = rotated_y + table_y
+
+        return table_world_x, table_world_y
+        
+
     def is_changed(self, prev, curr, eps=1e-3):
         if prev is None:
             return True
@@ -80,6 +118,7 @@ class EdgeLabeling(Node):
 
     def calc_once(self):
         if self.have_all():
+            self.edge_world()
             self.PoseSelection()
 
     # ------------------------------------------------
@@ -124,13 +163,13 @@ class EdgeLabeling(Node):
 
         for name, (lx, ly) in local_edges.items():
             ex = lx * c - ly * s
-            ey = lx * s - ly * c
+            ey = lx * s + ly * c
 
             local_rotated_edge[name] = np.array([ex, ey])
         
         for name, (lx, ly) in local_corners.items():
             cx = lx * c - ly * s
-            cy = lx * s - ly * c
+            cy = lx * s + ly * c
 
             local_rotated_corner[name] = np.array([cx, cy])
 
