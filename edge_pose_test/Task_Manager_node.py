@@ -140,10 +140,12 @@ class TaskManager(Node):
             self.case = "case1"
             out_LLM = "OK, I will take you Right edge"
             #out_LLM = self.LLM_edge_case1(command_text)
+            out_LLM = self.LLM_edge_case_both(command_text)
         elif any("Near right edge" in e for e in self.edges):
             self.case = "case2"
             out_LLM = "OK, I will take you Near Right edge"
             #out_LLM = self.LLM_edge_case2(command_text)
+            out_LLM = self.LLM_edge_case_both(command_text)
         
         self.get_logger().info(f"LLM output: {out_LLM}")
         trigger = Empty()
@@ -228,8 +230,9 @@ class TaskManager(Node):
                 "messages": [{"role": "user", "content": prompt}]
                 }
         response = requests.post(API_URL, json=data, headers=headers)
-        print(response)
+        #print(response)
         result = response.json()
+        print(result)
         output = result["choices"][0]["message"]["content"]
         print("Assistant:", output)
         return output
@@ -271,8 +274,61 @@ class TaskManager(Node):
                 "messages": [{"role": "user", "content": prompt}]
                 }
         response = requests.post(API_URL, json=data, headers=headers)
-        print(response)
+        #print(response)
         result = response.json()
+        print(result)
+        output = result["choices"][0]["message"]["content"]
+        print("Assistant:", output)
+        return output
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def LLM_edge_case_both(self, text):
+        base_prompt = """
+        You are an assistant AI mounted on a wheelchair.
+        You are currently near a rectangular table, and two possible situations may happen:
+
+        In the first situation you are directly facing one of the table edges. The edges names are the following ones:
+
+        Near Edge – the side you are looking at
+        Far Edge – the side farthest from the wheelchair
+        Right Edge – the right side of the table relative to the wheelchair’s forward direction
+        Left Edge – the left side of the table relative to the wheelchair’s forward direction
+
+        In the second situation, the table is not perpendicular to you, but you still look towards the center of it.
+        There are four possible edge positions around the table named based on the closest corner to you. The corner is shared by the near edges.
+
+        Near Right Edge - Edge at the right side of the near corner  
+        Near Left Edge – Edge at the left side of the near corner
+
+        The furthest corner is localated in the opposite side of the nearest one. This corner is shared by the far edges
+        Far Left Edge – Edge at the left side of the far corner
+        Far Right Edge – Edge at the right side of the far corner
+
+        When the user makes a request, infere which situation is happening and determine the most suitable position only if you can identify it with complete certainty.
+        If there is any risk of choosing the wrong position, you must respond with “I don't know.”
+
+        Your response must follow these rules:
+
+        Your output must include exactly one of the following options:
+        “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”, “Near Right Edge”, “Far Right Edge”, “Far Left Edge”, “Near Left Edge”, or “I don't know”.
+        Never output more than one of these labels in a single response.
+        If you are not completely certain, respond only with “I don't know.”
+        If you can determine the correct position, respond politely in one or two sentences and include the chosen label.
+
+        User request:
+        """
+        prompt = base_prompt + text
+        #print(prompt)
+        data = {
+                "model": "google/gemma-3n-e4b-it:free",
+                "messages": [{"role": "user", "content": prompt}]
+                }
+        response = requests.post(API_URL, json=data, headers=headers)
+        #print(response)
+        result = response.json()
+        print(result)
         output = result["choices"][0]["message"]["content"]
         print("Assistant:", output)
         return output

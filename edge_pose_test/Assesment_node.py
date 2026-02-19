@@ -45,7 +45,7 @@ class Assessment(Node):
         self.state = {"table": {"pos": None, "quat": None, "size": None},}
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.filename = f"prompt_test_{timestamp}.xlsx"
+        self.filename = f"../result_file/prompt_test_{timestamp}.xlsx"
         header = ["Scenario", "Answer Label", "Request", "LLM Output", "Judged Label", "True/False"]
         wb = Workbook()
         ws = wb.active
@@ -188,6 +188,9 @@ class Assessment(Node):
             self.robot_x = round(random.uniform(-3, 3), 1)
             self.robot_y = round(random.uniform(-3, 3), 1)
             self.robot_yaw = round(random.uniform(0, 359), 1)
+            self.table_size_x = round(random.uniform(0.5, 1.2), 1)
+            self.table_size_y = round(random.uniform(1.0, 1.5), 1)
+            self.table_size_h = round(random.uniform(0.5, 0.7), 1)
             dx=self.robot_x
             dy=self.robot_y
             t_id=math.atan2(dy,dx)*180/3.14
@@ -199,7 +202,8 @@ class Assessment(Node):
         self.get_logger().info(f"robot_x: {self.robot_x}")
         self.get_logger().info(f"robot_y: {self.robot_y}")
         self.get_logger().info("---------------------------------------\n")
-        values.data = [self.robot_x, self.robot_y, self.robot_yaw, 1.0]
+        values.data = [self.robot_x, self.robot_y, self.robot_yaw, 
+                self.table_size_x, self.table_size_y, self.table_size_h, 1.0]
         self.map_update_pub.publish(values)
 
         # ===== リセット =====
@@ -230,9 +234,25 @@ class Assessment(Node):
                 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def edge_list_split(self, edge_list):
-        edges = edge_list.splitlines()
-        edges_split = [edge.split(":")[1].split("/")[0].strip() for edge in edges if edge.strip()]
-        return edges_split
+        edges = []
+
+        for line in edge_list.splitlines():
+            if not line.strip():
+                continue
+
+            # ":" の右側を取得
+            right_part = line.split(":", 1)[1]
+
+            # "/" で分割
+            parts = [p.strip() for p in right_part.split("/")]
+
+            # 最後は座標なので除外
+            labels = parts[:-1]
+
+            edges.append(labels)
+
+        return edges
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -244,31 +264,50 @@ class Assessment(Node):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def result_edge(self, LLM_out, edge_list):
+
         self.out_edge = None
+        self.out_edge_num = None
+        matched_index = None
+        matched_label = None
 
         edges_split = self.edge_list_split(edge_list)
+        lines = edge_list.splitlines()
 
-        #print(LLM_out)
-        for n in range(4):
-            #print(edges_split[n])
-            if edges_split[n] in LLM_out:
-                self.out_edge = edges_split[n]
-                self.out_edge_num = n + 1
+        LLM_lower = LLM_out.casefold()
+
+        # --- 全ラベルをフラット化 ---
+        all_labels = []
+
+        for idx, labels in enumerate(edges_split):
+            for label in labels:
+                all_labels.append((idx, label))
+
+        # --- ラベル長で降順ソート（最長一致優先） ---
+        all_labels.sort(key=lambda x: len(x[1]), reverse=True)
+
+        # --- 全体から最長一致を探す ---
+        for idx, label in all_labels:
+            pattern = rf"\b{re.escape(label.casefold())}\b"
+            if re.search(pattern, LLM_lower):
+                matched_index = idx
+                matched_label = label
                 break
 
-        lines = edge_list.splitlines()
-        match = re.search(r"\(([-\d.]+),\s*([-\d.]+)\)", lines[n])
-       
-        if match:
-            self.edge_x = float(match.group(1))
-            self.edge_y = float(match.group(2))
-
-        if self.out_edge is None:
+        if matched_index is None:
             self.get_logger().info("(No matching edge found in LLM output)")
             return
 
-        if self.goal_num < 0 or self.goal_num >= len(edges_split):
-            self.get_logger().info("(((gola_num out of range)))")
+        # マッチ情報保存
+        self.out_edge = matched_label
+        self.out_edge_num = matched_index + 1
+
+        # 座標抽出
+        match = re.search(r"\(([-\d.]+),\s*([-\d.]+)\)", lines[matched_index])
+        if match:
+            self.edge_x = float(match.group(1))
+            self.edge_y = float(match.group(2))
+        else:
+            self.get_logger().info("(Coordinate parse failed)")
             return
 
         return self.out_edge
@@ -278,7 +317,7 @@ class Assessment(Node):
     def save_data(self, case, command, LLM_out, LLM_edge, goal_edge, TF):
         wb = load_workbook(self.filename)
         ws = wb.active
-        ws.append([case, command, LLM_out, LLM_edge, goal_edge, TF])
+        ws.append([case, command, LLM_out, LLM_edge, goal_edge[0], goal_edge[1], TF])
         wb.save(self.filename)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

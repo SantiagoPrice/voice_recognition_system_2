@@ -61,11 +61,11 @@ class VoiceRecognition(Node):
                 if not self.read:
                     continue
                 
-                #rec.AcceptWaveform(data):
+                #if rec.AcceptWaveform(data):
                 if self.read:
                     self.read=False
-                    result = json.loads(rec.Result())
-                    text = result.get("text", "").strip().lower()
+                    #result = json.loads(rec.Result())
+                    #text = result.get("text", "").strip().lower()
                     text = input("test sentence: ")
                     #print(f"audio recording: {text}")
 
