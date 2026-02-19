@@ -27,7 +27,7 @@ from geometry_msgs.msg import Point
 from std_msgs.msg import String
 
 #---------------------------------------------------
-robot_x = 2.5
+robot_x = 0.0
 robot_y = 1.5
 robot_yaw_deg = 270.0
 robot_name = "robot"
@@ -89,7 +89,10 @@ class MapBroadcaster(Node):
         global robot_x
         global robot_y
         global robot_yaw_deg
+        global robot_yaw_rad
         robot_x, robot_y, robot_yaw_deg, self.dummy_value = msg.data
+        
+        robot_yaw_rad = math.radians(robot_yaw_deg)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def publish_marker(self):

@@ -149,7 +149,7 @@ class EdgeLabeling(Node):
         edge_order = [edge_names[i] for i in sort_idx]
 
         # ===== semanticラベル =====
-        THETA_A = 15.0
+        THETA_A = 10.0
 
         if sorted_corner[0][1] < THETA_A:
             labels = ["Near left edge",

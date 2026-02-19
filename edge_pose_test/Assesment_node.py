@@ -177,7 +177,7 @@ class Assessment(Node):
         self.get_logger().info("---------------------------------------")
         # LLM_lineの表示
         self.vis = 1.0
-        time.sleep(5)
+        #time.sleep(5)
         self.vis = 0.0
         self.get_logger().info("")
         
@@ -188,6 +188,11 @@ class Assessment(Node):
             self.robot_x = round(random.uniform(-3, 3), 1)
             self.robot_y = round(random.uniform(-3, 3), 1)
             self.robot_yaw = round(random.uniform(0, 359), 1)
+            dx=self.robot_x
+            dy=self.robot_y
+            t_id=math.atan2(dy,dx)*180/3.14
+            self.robot_yaw = round(random.uniform(t_id-10, t_id+10), 1)
+
             if (abs(self.robot_x) > 1.0) and (abs(self.robot_y) > 1.0):
                 break
         self.get_logger().info("------ Robot position is updated ------")
@@ -263,7 +268,7 @@ class Assessment(Node):
             return
 
         if self.goal_num < 0 or self.goal_num >= len(edges_split):
-            self.get_logger.info("(((gola_num out of range)))")
+            self.get_logger().info("(((gola_num out of range)))")
             return
 
         return self.out_edge
@@ -315,14 +320,14 @@ class Assessment(Node):
             start.x = table_x - (table_size_x / 2) - offset_start
             start.y = table_y
             start.z = table_z
-        if self.goal_num == 4:
+        if self.goal_num == 2:
             end.x = table_x
             end.y = table_y + (table_size_y / 2) + offset_end
             end.z = table_z
             start.x = table_x
             start.y = table_y + (table_size_y / 2) + offset_start
             start.z = table_z
-        if self.goal_num == 2:
+        if self.goal_num == 4:
             end.x = table_x
             end.y = table_y - (table_size_y / 2) - offset_end
             end.z = table_z
