@@ -54,9 +54,9 @@ class VoiceRecognition(Node):
                 else:
                     self.read=True
                     print(f"Volume: {volume:.4f}")
-                    result = json.loads(rec.Result())
-                    text = result.get("text", "").strip().lower()
-                    self.get_logger().info(text)
+                    #result = json.loads(rec.Result())
+                    #text = result.get("text", "").strip().lower()
+                    #self.get_logger().info(text)
 
                 if not self.read:
                     continue
@@ -64,14 +64,16 @@ class VoiceRecognition(Node):
                 #if rec.AcceptWaveform(data):
                 if self.read:
                     self.read=False
-                    result = json.loads(rec.Result())
+                    #result = json.loads(rec.Result())
                     #text = result.get("text", "").strip().lower()
                     text = input("test sentence: ")
-                    print(f"audio recording: {text}")
+                    #print(f"audio recording: {text}")
 
-                    command = String()
-                    command.data = text
-                    self.pub_text.publish(command)
+                    if text:
+                        self.get_logger().info(f"audio recording: {text}")
+                        command = String()
+                        command.data = text
+                        self.pub_text.publish(command)
     
 def main():
     rclpy.init()

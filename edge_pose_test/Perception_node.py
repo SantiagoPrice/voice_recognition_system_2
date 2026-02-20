@@ -27,8 +27,8 @@ from geometry_msgs.msg import Point
 from std_msgs.msg import String
 
 #---------------------------------------------------
-robot_x = 2.5
-robot_y = 1.5
+robot_x = 0.0
+robot_y = -1.5
 robot_yaw_deg = 270.0
 robot_name = "robot"
 robot_size_x = 0.5
@@ -36,7 +36,7 @@ robot_size_y = 0.5
 robot_size_z = 1.0
 table_x = 0.0
 table_y = 0.0
-table_yaw_deg = 0.0
+table_yaw_deg = 0.0 
 table_name = "table"
 table_size_x = 1.5
 table_size_y = 0.9
@@ -89,7 +89,13 @@ class MapBroadcaster(Node):
         global robot_x
         global robot_y
         global robot_yaw_deg
-        robot_x, robot_y, robot_yaw_deg, self.dummy_value = msg.data
+        global robot_yaw_rad
+        global table_size_x
+        global table_size_y
+        global table_height
+        robot_x, robot_y, robot_yaw_deg, table_size_x, table_size_y, table_height, self.dummy_value = msg.data
+        
+        robot_yaw_rad = math.radians(robot_yaw_deg)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def publish_marker(self):
@@ -207,6 +213,15 @@ class MapBroadcaster(Node):
         m_Tcon.color.g = 0.3
         m_Tcon.color.b = 0.0
         m_Tcon.color.a = 1.0
+        
+        table_hsize_x = table_size_x / 2
+        table_hsize_y = table_size_y / 2
+        corners = [
+                ((table_x+table_hsize_x), (table_y+table_hsize_y), table_height),
+                ((table_x-table_hsize_x), (table_y+table_hsize_y), table_height),
+                ((table_x-table_hsize_x), (table_y-table_hsize_y), table_height),
+                ((table_x+table_hsize_x), (table_y-table_hsize_y), table_height)
+                ] 
         for corner in corners:
             start = Point()
             start.x, start.y, start.z = table_x, table_y, (table_size_z)

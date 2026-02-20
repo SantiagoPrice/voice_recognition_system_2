@@ -29,8 +29,8 @@ from geometry_msgs.msg import Point
 from std_msgs.msg import String
 
 #---------------------------------------------------
-table_x = 2.5
-table_y = 1.5
+table_x = 0.0
+table_y = 0.0
 table_yaw_deg = 270.0
 table_name = "table"
 table_size_x = 1.5
@@ -38,8 +38,8 @@ table_size_y = 0.9
 table_size_z = 0.75
 
 
-robot_x = 0.0
-robot_y = 0.0
+robot_x = 3.0
+robot_y = 2.0
 robot_yaw_deg = 0.0
 robot_name = "robot"
 robot_size_x = 0.5
@@ -93,13 +93,13 @@ class MapBroadcaster(Node):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def map_update_cb(self, msg):
         self.get_logger().info("map_update")
-        global table_x
-        global table_y
-        global table_yaw_deg
-        global table_yaw_rad
+        global robot_x
+        global robot_y
+        global robot_yaw_deg
+        global robot_yaw_rad
         
-        table_x, table_y, table_yaw_deg, self.dummy_value = msg.data
-        table_yaw_rad = math.radians(table_yaw_deg)
+        robot_x, robot_y, robot_yaw_deg, self.dummy_value = msg.data
+        robot_yaw_rad = math.radians(robot_yaw_deg)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def publish_marker(self):

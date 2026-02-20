@@ -142,11 +142,11 @@ class TaskManager(Node):
         out_LLM = self.LLM(command_text)
         """
 
-        if any("Near edge" in e for e in self.edges):
+        if any("Near Edge" in e for e in self.edges):
             self.case = "case1"
             out_LLM = "OK, I will take you Right edge"
             out_LLM = self.LLM_edge_case1(command_text)
-        elif any("Near Right edge" in e for e in self.edges):
+        elif any("Near Right Edge" in e for e in self.edges):
             self.case = "case2"
             out_LLM = "OK, I will take you Near Right edge"
             out_LLM = self.LLM_edge_case2(command_text)
@@ -236,8 +236,9 @@ class TaskManager(Node):
         response = requests.post(API_URL, json=data, headers=headers)
         print(response)
         result = response.json()
+        print(result)
         output = result["choices"][0]["message"]["content"]
-        print("Assistant:", output)
+        #print("Assistant:", output)
         return output
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

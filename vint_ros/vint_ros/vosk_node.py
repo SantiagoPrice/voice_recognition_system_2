@@ -21,10 +21,11 @@ from ament_index_python.packages import get_package_share_directory
 
 GpuInit()
 
-pkg_path = get_package_share_directory('vint_ros')
+#pkg_path = get_package_share_directory('vint_ros')
 
 #MODEL_PATH = "/home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/vint_ros/vint_ros/vosk-model_big/vosk-model-en-us-0.42-gigaspeech"
-MODEL_PATH = os.path.join(pkg_path,"vosk-model_big/vosk-model-en-us-0.42-gigaspeech")
+#MODEL_PATH = os.path.join(pkg_path,"vosk-model_big/vosk-model-en-us-0.42-gigaspeech")
+MODEL_PATH = "/home/orin/voice_recognition_system_edit/vosk-model-lm/vosk-model-en-us-0.22"
 print(MODEL_PATH)
 model = Model(MODEL_PATH)
 
@@ -49,7 +50,7 @@ class VoiceRecognition(Node):
         samplerate = int(sd.query_devices(None, "input")["default_samplerate"])
         print(f"actual sample rate is {samplerate}")
         with sd.RawInputStream(samplerate=samplerate, blocksize=int(samplerate*1), dtype="int16",
-                               channels=1, callback=audio_callback, device=0):
+                               channels=1, callback=audio_callback, device=None):
             rec = vosk.KaldiRecognizer(model, samplerate)
             print("Listening...")
             self.read=False

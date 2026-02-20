@@ -118,7 +118,7 @@ class EdgeLabeling(Node):
 
     def calc_once(self):
         if self.have_all():
-            self.edge_world()
+            #self.edge_world(
             self.PoseSelection()
 
     # ------------------------------------------------

@@ -136,7 +136,7 @@ class EdgeLabeling(Node):
 
             angle_corner = np.degrees(np.arctan2(cx, cy))
             theta = (angle_TR - angle_corner + 360.0) % 360.0
-            corner_theta[name] = theta
+            corner_theta[name] = theta 
 
 
         # ===== θでソート（右回り）=====
@@ -149,23 +149,36 @@ class EdgeLabeling(Node):
         edge_order = [edge_names[i] for i in sort_idx]
 
         # ===== semanticラベル =====
-        THETA_A = 15.0
+        THETA_A = 10.0
+
+        GAMMA = (sorted_corner[0][1] + (360.0 - sorted_corner[3][1])) / 2
 
         if sorted_corner[0][1] < THETA_A:
-            labels = ["Near left edge",
-                      "Near right edge",
-                      "Far right edge",
-                      "Far left edge"]
+            labels = ["Near left edge / Near edge",
+                      "Near right edge / Right edge",
+                      "Far right edge / Far edge",
+                      "Far left edge / Left edge"]
         elif sorted_corner[3][1] < (360.0 - THETA_A):
-            labels = ["Near edge",
-                    "Right edge",
-                    "Far edge",
-                    "Left edge"]
+            if sorted_corner[0][1] < GAMMA:
+                labels = ["Near edge / Near Left edge",
+                        "Right edge / Near Right edge",
+                        "Far edge / Far Right edge",
+                        "Left edge / Far Left edge"]
+            elif sorted_corner[0][1] > GAMMA:
+                labels = ["Near edge / Near Right edge",
+                        "Right edge / Far Right edge",
+                        "Far edge / Far Left edge",
+                        "Left edge / Near Left edge"]
+            else:
+                labels = ["Near edge / Near edge",
+                        "Right edge / Right edge",
+                        "Far edge / Far edge",
+                        "Left edge / Left edge"]
         else:
-            labels = ["Near right edge",
-                      "Far right edge",
-                      "Far left edge",
-                      "Near left edge"]
+            labels = ["Near right edge / Near edge",
+                      "Far right edge / Right edge",
+                      "Far left edge / Far edge",
+                      "Near left edge / Left edge"]
 
         semantic_map = {}
         for phys, label in zip(order, labels):
