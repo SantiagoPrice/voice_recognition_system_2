@@ -106,7 +106,8 @@ class TaskManager(Node):
             self.on_command_update(text)
             return
         # changed => process
-        if text != self.cmd_last:
+        #if text != self.cmd_last:
+        else:
             self.cmd_last = text
             self.on_command_update(text)
 
@@ -144,11 +145,11 @@ class TaskManager(Node):
         if any("Near edge" in e for e in self.edges):
             self.case = "case1"
             out_LLM = "OK, I will take you Right edge"
-            #out_LLM = self.LLM_edge_case1(command_text)
-        elif any("Near right edge" in e for e in self.edges):
+            out_LLM = self.LLM_edge_case1(command_text)
+        elif any("Near Right edge" in e for e in self.edges):
             self.case = "case2"
             out_LLM = "OK, I will take you Near Right edge"
-            #out_LLM = self.LLM_edge_case2(command_text)
+            out_LLM = self.LLM_edge_case2(command_text)
         
         self.get_logger().info(f"LLM output: {out_LLM}")
         trigger = Empty()
