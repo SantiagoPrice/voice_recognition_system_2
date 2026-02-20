@@ -45,7 +45,7 @@ class Assessment(Node):
         self.state = {"table": {"pos": None, "quat": None, "size": None},}
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.filename = f"../result_file/prompt_test_{timestamp}.xlsx"
+        self.filename = f"prompt_test_{timestamp}.xlsx"
         header = ["Scenario", "Answer Label", "Request", "LLM Output", "Judged Label", "True/False"]
         wb = Workbook()
         ws = wb.active

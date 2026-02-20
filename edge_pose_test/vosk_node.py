@@ -1,3 +1,4 @@
+import sys
 import vosk
 import json
 import sounddevice as sd
@@ -10,9 +11,10 @@ from rclpy.node import Node
 from vosk import Model, KaldiRecognizer , GpuInit
 from std_msgs.msg import String
 
+
 GpuInit()
 
-MODEL_PATH = "/home/orin/voice_recognition_system_edit/vosk-model-lm/vosk-model-en-us-0.22"
+MODEL_PATH = "/home/sip-mobility/docker_projects/nav2_ws/src/assets/vosk-model_big/vosk-model-en-us-0.42-gigaspeech"
 model = Model(MODEL_PATH)
 
 q = queue.Queue()
@@ -36,7 +38,7 @@ class VoiceRecognition(Node):
         samplerate = int(sd.query_devices(None, "input")["default_samplerate"])
         print(f"actual sample rate is {samplerate}")
         with sd.RawInputStream(samplerate=samplerate, blocksize=int(samplerate*1), dtype="int16",
-                               channels=1, callback=audio_callback, device=None):
+                               channels=1, callback=audio_callback, device=0):
             rec = vosk.KaldiRecognizer(model, samplerate)
             print("Listening...")
             self.read=False
@@ -61,13 +63,13 @@ class VoiceRecognition(Node):
                 if not self.read:
                     continue
                 
-                #if rec.AcceptWaveform(data):
-                if self.read:
+                if rec.AcceptWaveform(data):
+                #if self.read:
                     self.read=False
-                    #result = json.loads(rec.Result())
-                    #text = result.get("text", "").strip().lower()
-                    text = input("test sentence: ")
-                    #print(f"audio recording: {text}")
+                    result = json.loads(rec.Result())
+                    text = result.get("text", "").strip().lower()
+                    #text = input("test sentence: ")
+                    print(f"audio recording: {text}")
 
                     if text:
                         self.get_logger().info(f"audio recording: {text}")

@@ -10,6 +10,7 @@ import requests
 import time
 import numpy as np
 import pyttsx3
+from google import genai
 import math
 import random
 from rclpy.node import Node
@@ -29,6 +30,8 @@ from std_msgs.msg import Int32
 
 API_KEY = ' '
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+client = genai.Client(api_key=" ")
 
 engine = pyttsx3.init()
 engine.setProperty("rate", 150)
@@ -186,10 +189,17 @@ class TaskManager(Node):
                 "model": "google/gemma-3n-e4b-it:free",
                 "messages": [{"role": "user", "content": prompt}]
                 }
-        response = requests.post(API_URL, json=data, headers=headers)
-        print(response)
-        result = response.json()
-        output = result['choices'][0]['message']['content']
+        #response = requests.post(API_URL, json=data, headers=headers)
+   
+
+        response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+        
+        output = response.text
+        #try:
+        #    output = result["choices"][0]["message"]["content"]
+        #except KeyError:
+        #    print("KeyError in result, full content:", result)
+        #    raise
         print("Assistant:", output)
         return output
 
@@ -224,16 +234,22 @@ class TaskManager(Node):
         User request:
         """
         prompt = base_prompt + text
-        #print(prompt)
+        print(prompt)
         data = {
                 "model": "google/gemma-3n-e4b-it:free",
                 "messages": [{"role": "user", "content": prompt}]
                 }
-        response = requests.post(API_URL, json=data, headers=headers)
-        #print(response)
-        result = response.json()
-        print(result)
-        output = result["choices"][0]["message"]["content"]
+        #response = requests.post(API_URL, json=data, headers=headers)
+   
+
+        response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+        
+        output = response.text
+        #try:
+        #    output = result["choices"][0]["message"]["content"]
+        #except KeyError:
+        #    print("KeyError in result, full content:", result)
+        #    raise
         print("Assistant:", output)
         return output
 
@@ -268,16 +284,22 @@ class TaskManager(Node):
         User request:
         """
         prompt = base_prompt + text
-        #print(prompt)
+        print(prompt)
         data = {
                 "model": "google/gemma-3n-e4b-it:free",
                 "messages": [{"role": "user", "content": prompt}]
                 }
-        response = requests.post(API_URL, json=data, headers=headers)
-        #print(response)
-        result = response.json()
-        print(result)
-        output = result["choices"][0]["message"]["content"]
+        #response = requests.post(API_URL, json=data, headers=headers)
+   
+
+        response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+        
+        output = response.text
+        #try:
+        #    output = result["choices"][0]["message"]["content"]
+        #except KeyError:
+        #    print("KeyError in result, full content:", result)
+        #    raise
         print("Assistant:", output)
         return output
 
@@ -311,25 +333,64 @@ class TaskManager(Node):
 
         Your response must follow these rules:
 
-        Your output must include exactly one of the following options:
-        “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”, “Near Right Edge”, “Far Right Edge”, “Far Left Edge”, “Near Left Edge”, or “I don't know”.
+        Your output must include exactly one of the following options if you think your arein the first situation:
+        “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”,
+         
+        Your output must include exactly one of the following options if you think your arein the second situation:
+        “Near Right Edge”, “Far Right Edge”, “Far Left Edge”, “Near Left Edge”,
+
         Never output more than one of these labels in a single response.
         If you are not completely certain, respond only with “I don't know.”
         If you can determine the correct position, respond politely in one or two sentences and include the chosen label.
 
         User request:
         """
-        prompt = base_prompt + text
-        #print(prompt)
+
+        base_prompt2="""
+        "You are an assistant AI mounted on a wheelchair, positioned near a rectangular table. Your goal is to accurately identify the requested table edge based on the user's instructions.
+
+        Here's a reminder of the edge names:
+
+        Situation 1: Facing a Table Edge Directly
+
+        * Near Edge: The edge you are currently facing.
+        * Far Edge: The edge directly opposite the Near Edge.
+        * Right Edge: The right side of the table, relative to your forward direction.
+        * Left Edge: The left side of the table, relative to your forward direction.
+
+        Situation 2: Table Not Perpendicular - Viewing Towards Center
+
+        * Near Right Edge: The right side of the near corner closest to you.
+        * Far Right Edge: The right side of the far corner, opposite the near corner.
+        * Far Left Edge: The left side of the far corner, opposite the near corner.
+        * Near Left Edge: The left side of the near corner closest to you.
+
+        Important Considerations:
+
+        * The "back side" of the table refers to the edge directly opposite the edge you are facing.
+        * When the table is not perpendicular, the "Near/Close/Front" and "Far/Back/Opposite" designations refer to the two corners closest and farthest from your current position, respectively.
+        * If you are unsure about the user's request, respond with "I don't know."
+        * Your output must include exactly one of the edges labels: “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”, “Near Right Edge”, “Far Right Edge”, “Far Left Edge”, “Near Left Edge”
+
+        User Request:"
+        """
+        prompt = base_prompt2 + text
+        print(prompt)
         data = {
                 "model": "google/gemma-3n-e4b-it:free",
                 "messages": [{"role": "user", "content": prompt}]
                 }
-        response = requests.post(API_URL, json=data, headers=headers)
-        #print(response)
-        result = response.json()
-        print(result)
-        output = result["choices"][0]["message"]["content"]
+        #response = requests.post(API_URL, json=data, headers=headers)
+   
+
+        response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+        
+        output = response.text
+        #try:
+        #    output = result["choices"][0]["message"]["content"]
+        #except KeyError:
+        #    print("KeyError in result, full content:", result)
+        #    raise
         print("Assistant:", output)
         return output
 
@@ -356,7 +417,7 @@ if __name__ == "__main__":
 
 
 
-        
-        
-        
-        
+
+
+
+

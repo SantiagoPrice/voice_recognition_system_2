@@ -36,6 +36,9 @@ table_name = "table"
 table_size_x = 1.5
 table_size_y = 0.9
 table_size_z = 0.75
+table_thick=0.07
+
+leg_width=0.1
 
 
 robot_x = 3.0
@@ -159,7 +162,7 @@ class MapBroadcaster(Node):
         table_height = table_size_z
         m_table.pose.position.x = float(table_x)
         m_table.pose.position.y = float(table_y)
-        m_table.pose.position.z = table_height / 2.0
+        m_table.pose.position.z = table_height-table_thick/2#table_height / 2.0
         m_table.pose.orientation.x = q_table[0]
         m_table.pose.orientation.y = q_table[1]
         m_table.pose.orientation.z = q_table[2]
@@ -167,13 +170,57 @@ class MapBroadcaster(Node):
         # table_size
         m_table.scale.x = table_size_x
         m_table.scale.y = table_size_y
-        m_table.scale.z = table_height
+        m_table.scale.z = table_thick
+
         m_table.color.r = 0.0
         m_table.color.g = 0.0
         m_table.color.b = 1.0
         m_table.color.a = 0.5
         m_table.lifetime = Duration(sec=0, nanosec=0)
         self.table_marker_pub.publish(m_table)
+
+        #---table legs_Marker---
+        m_legs = Marker()
+        m_legs.header.stamp = now
+        m_legs.header.frame_id = 'map'
+        m_legs.ns = 'table_legs'
+        m_legs.id = 0
+        m_legs.type = Marker.CUBE_LIST
+        m_legs.action = Marker.ADD
+        # first_leg_position
+        table_height = table_size_z
+        m_legs.pose.position.x = float(table_x)+float(table_x)/2#-leg_width
+        m_legs.pose.position.y = float(table_y)+float(table_y)/2#-leg_width
+        m_legs.pose.position.z = (table_height-table_thick)/2#table_height / 2.0
+        m_legs.pose.orientation.x = q_table[0]
+        m_legs.pose.orientation.y = q_table[1]
+        m_legs.pose.orientation.z = q_table[2]
+        m_legs.pose.orientation.w = q_table[3]
+        # leg_size
+        m_legs.scale.x = leg_width
+        m_legs.scale.y = leg_width
+        m_legs.scale.z = (table_height-table_thick)
+
+        # leg separation
+
+        # Calculate leg positions based on table size and leg separation
+        leg_separation_x = (table_size_x - leg_width) / 2
+        leg_separation_y = (table_size_y - leg_width) / 2
+
+        # Four corners for legs
+        leg_positions = [
+            Point(x=table_x + leg_separation_x, y=table_y + leg_separation_y, z=0.0),
+            Point(x=table_x - leg_separation_x, y=table_y + leg_separation_y, z=0.0),
+            Point(x=table_x - leg_separation_x, y=table_y - leg_separation_y, z=0.0),
+            Point(x=table_x + leg_separation_x, y=table_y - leg_separation_y, z=0.0),
+        ]
+        m_legs.points.extend(leg_positions)
+        m_legs.color.r = 0.0
+        m_legs.color.g = 0.0
+        m_legs.color.b = 1.0
+        m_legs.color.a = 1.0
+        m_legs.lifetime = Duration(sec=0, nanosec=0)
+        self.table_marker_pub.publish(m_legs)
 
         # ---robot_Marker---
         m_robot = Marker()
