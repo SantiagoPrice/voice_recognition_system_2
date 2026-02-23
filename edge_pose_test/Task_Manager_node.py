@@ -27,6 +27,8 @@ from geometry_msgs.msg import Point
 from std_msgs.msg import String
 from std_msgs.msg import Empty
 from std_msgs.msg import Int32
+import ast
+import re
 
 API_KEY = ' '
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -120,6 +122,11 @@ class TaskManager(Node):
         if len(edges) != 4:
             self.get_logger().warn(f"Unexpected /edge_list format: {edges}")
             return
+        
+        edges_pose=[]
+        for edge in edges:
+            edges_pose.append(ast.literal_eval(edge.split(" / ")[-1])) 
+
 
         edge_1, edge_2, edge_3, edge_4 = edges
         self.get_logger().info("------------- Edge updated --------------")
@@ -154,6 +161,8 @@ class TaskManager(Node):
         trigger = Empty()
         out_LLM_msg = String()
         out_LLM_msg.data = out_LLM
+        
+
         self.LLM_out.publish(out_LLM_msg)
         self.prediction.publish(trigger)
         self.get_logger().info(f"prediction trigger")
@@ -394,6 +403,128 @@ class TaskManager(Node):
         print("Assistant:", output)
         return output
 
+    def result_edge(self, LLM_out, edge_list):
+
+        self.out_edge = None
+        self.out_edge_num = None
+        matched_index = None
+        matched_label = None
+
+        edges_split = self.edge_list_split(edge_list)
+        lines = edge_list.splitlines()
+
+        LLM_lower = LLM_out.casefold()
+
+        # --- 全ラベルをフラット化 ---
+        all_labels = []
+
+        for idx, labels in enumerate(edges_split):
+            for label in labels:
+                all_labels.append((idx, label))
+
+        # --- ラベル長で降順ソート（最長一致優先） ---
+        all_labels.sort(key=lambda x: len(x[1]), reverse=True)
+
+        # --- 全体から最長一致を探す ---
+        for idx, label in all_labels:
+            pattern = rf"\b{re.escape(label.casefold())}\b"
+            if re.search(pattern, LLM_lower):
+                matched_index = idx
+                matched_label = label
+                break
+
+        if matched_index is None:
+            self.get_logger().info("(No matching edge found in LLM output)")
+            return
+
+        # マッチ情報保存
+        self.out_edge = matched_label
+        self.out_edge_num = matched_index + 1
+
+        # 座標抽出
+        match = re.search(r"\(([-\d.]+),\s*([-\d.]+)\)", lines[matched_index])
+        if match:
+            self.edge_x = float(match.group(1))
+            self.edge_y = float(match.group(2))
+        else:
+            self.get_logger().info("(Coordinate parse failed)")
+            return
+
+        return self.out_edge
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def edge_list_split(self, edge_list):
+        edges = []
+
+        for line in edge_list.splitlines():
+            if not line.strip():
+                continue
+
+            # ":" の右側を取得
+            right_part = line.split(":", 1)[1]
+
+            # "/" で分割
+            parts = [p.strip() for p in right_part.split("/")]
+
+            # 最後は座標なので除外
+            labels = parts[:-1]
+
+            edges.append(labels)
+
+        return edges
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def result_edge(self, LLM_out, edge_list):
+
+        self.out_edge = None
+        self.out_edge_num = None
+        matched_index = None
+        matched_label = None
+
+        edges_split = self.edge_list_split(edge_list)
+        lines = edge_list.splitlines()
+
+        LLM_lower = LLM_out.casefold()
+
+        # --- 全ラベルをフラット化 ---
+        all_labels = []
+
+        for idx, labels in enumerate(edges_split):
+            for label in labels:
+                all_labels.append((idx, label))
+
+        # --- ラベル長で降順ソート（最長一致優先） ---
+        all_labels.sort(key=lambda x: len(x[1]), reverse=True)
+
+        # --- 全体から最長一致を探す ---
+        for idx, label in all_labels:
+            pattern = rf"\b{re.escape(label.casefold())}\b"
+            if re.search(pattern, LLM_lower):
+                matched_index = idx
+                matched_label = label
+                break
+
+        if matched_index is None:
+            self.get_logger().info("(No matching edge found in LLM output)")
+            return
+
+        # マッチ情報保存
+        self.out_edge = matched_label
+        self.out_edge_num = matched_index + 1
+
+        # 座標抽出
+        match = re.search(r"\(([-\d.]+),\s*([-\d.]+)\)", lines[matched_index])
+        if match:
+            self.edge_x = float(match.group(1))
+            self.edge_y = float(match.group(2))
+        else:
+            self.get_logger().info("(Coordinate parse failed)")
+            return
+
+        return self.out_edge
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
