@@ -12,6 +12,7 @@ class EdgeLabeling(Node):
         super().__init__("Edge_Labeling")
 
         self.edge_pub = self.create_publisher(String, "/edge_list", 10)
+        self.cposes_pub = self.create_publisher(Marker, "/cand_poses", 10)
 
         self.state = {
             "robot": {"pos": None, "quat": None, "size": None},
@@ -82,6 +83,58 @@ class EdgeLabeling(Node):
         if self.have_all():
             self.PoseSelection()
 
+
+    def yaw_to_quaternion(eslf, yaw: float) -> list:
+        """Convert yaw angle (rad) to quaternion."""
+        qx = 0.0
+        qy = 0.0
+        qz = math.sin(yaw / 2.0)
+        qw = math.cos(yaw / 2.0)
+        q=[qx,qy,qz,qw]
+        return q
+
+
+    def create_arrow_marker(self, name, poses, yaw, frame_id="map"):
+        marker = Marker()
+
+        marker.header.frame_id = frame_id
+        marker.header.stamp.sec = 0
+        marker.header.stamp.nanosec = 0
+
+        marker.ns = "rso2_arrows"
+        marker.id = hash(name) % 10000
+
+        marker.type = Marker.ARROW
+        marker.action = Marker.ADD
+
+        # ✅ position from poses[name]
+        marker.pose.position.x = poses[0]
+        marker.pose.position.y = poses[1]
+        marker.pose.position.z = 0.0
+
+        # ✅ orientation from yaw
+        
+        q=self.yaw_to_quaternion(yaw)
+        marker.pose.orientation.x = q[0]
+        marker.pose.orientation.y = q[1] 
+        marker.pose.orientation.z = q[2] 
+        marker.pose.orientation.w = q[3] 
+
+        # Arrow size
+        marker.scale.x = 0.6   # length
+        marker.scale.y = 0.1   # width
+        marker.scale.z = 0.1   # height
+
+        # Color (RGBA)
+        marker.color.r = 0.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.color.a = 0.5
+
+        marker.lifetime.sec = 0  # forever
+
+        return marker
+
     # ------------------------------------------------
     def PoseSelection(self):
 
@@ -117,6 +170,7 @@ class EdgeLabeling(Node):
         local_rotated_edge = {}
         corner_theta = {}
         edge_theta = {}
+        poses = {}
 
         # ===== ロボット→中心ベクトル =====
         Pc = np.array([robot_x - table_x, robot_y - table_y])
@@ -136,7 +190,36 @@ class EdgeLabeling(Node):
 
             angle_corner = np.degrees(np.arctan2(cx, cy))
             theta = (angle_TR - angle_corner + 360.0) % 360.0
-            corner_theta[name] = theta 
+            corner_theta[name] = theta
+
+        for name, (lx, ly) in local_rotated_corner.items():
+            edge_name = list(local_edges.keys()) [ (list(local_corners.keys()).index(name)+1) % 4 ] # mapping from corners to edge keys
+            edge = local_rotated_edge[edge_name]
+            edge_l= np.linalg.norm(local_rotated_edge[edge_name])
+            edge_n = np.array([-edge[1],edge[0]])/ edge_l
+
+            
+  
+            poses.update({name : np.array([lx, ly]) + edge + 0.5*edge_n })
+            
+            pose_yaw = math.atan2(-poses[name][1],-poses[name][0])
+            arr=self.create_arrow_marker(name, poses[name] , pose_yaw , "map")
+            self.cposes_pub.publish(arr)
+
+            print ("publish arrow")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         # ===== θでソート（右回り）=====
