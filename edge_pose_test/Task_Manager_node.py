@@ -77,6 +77,7 @@ class TaskManager(Node):
         # ---- publish ---- #
         self.prediction = self.create_publisher(Empty, "/prediction", 10)
         self.LLM_out = self.create_publisher(String, "/LLM_out", 10)
+        self.cposes_pub = self.create_publisher(Marker, "/select_poses", 10)
         
 
     def cb_edge(self, msg: String):
@@ -116,24 +117,23 @@ class TaskManager(Node):
         """
         Called only when /edge_list is received first time or changed.
         """
-        edges = [s.strip() for s in edge_text.splitlines() if s.strip()]
-        self.edges = edges
+        edges_nm_ps = [s.strip() for s in edge_text.splitlines() if s.strip()]
+        
+        self.edges = {}
 
-        if len(edges) != 4:
+        if len(edges_nm_ps) != 4:
             self.get_logger().warn(f"Unexpected /edge_list format: {edges}")
             return
         
-        edges_pose=[]
-        for edge in edges:
-            edges_pose.append(ast.literal_eval(edge.split(" / ")[-1])) 
+        for edge_nm_ps in edges_nm_ps:
+            edge_name = edge_nm_ps.split("//")[0]
+            edge_ps = (ast.literal_eval(edge_nm_ps.split("//")[-1]))
+            self.edges.update({edge_name : edge_ps})
 
-
-        edge_1, edge_2, edge_3, edge_4 = edges
         self.get_logger().info("------------- Edge updated --------------")
-        self.get_logger().info(f"  1: {edge_1}")
-        self.get_logger().info(f"  2: {edge_2}")
-        self.get_logger().info(f"  3: {edge_3}")
-        self.get_logger().info(f"  4: {edge_4}")
+        for edge_n, edge_p in self.edges.items():        
+            self.get_logger().info(f"  Edge name: {edge_n} pose {edge_p}")
+
         self.get_logger().info("-----------------------------------------\n")
 
 
@@ -145,18 +145,23 @@ class TaskManager(Node):
         self.get_logger().info(f"Command updated: {command_text}")
         out_LLM = self.LLM(command_text)
         """
+        e_names= list(self.edges.keys())
 
-        if any("Near edge" in e for e in self.edges):
+        if any("Near edge" in e for e in e_names):
             self.case = "case1"
-            out_LLM = "OK, I will take you Right edge"
+            out_LLM = "OK, I will take you Right                                                                                                                                                                                                                                     edge"
             #out_LLM = self.LLM_edge_case1(command_text)
             out_LLM = self.LLM_edge_case_both(command_text)
-        elif any("Near right edge" in e for e in self.edges):
+        elif any("Near right edge" in e for e in e_names):
             self.case = "case2"
-            out_LLM = "OK, I will take you Near Right edge"
+            out_LLM = "OK, I will take you Far Right edge"
             #out_LLM = self.LLM_edge_case2(command_text)
             out_LLM = self.LLM_edge_case_both(command_text)
-        
+
+        self.result_edge(out_LLM)
+
+        self.create_arrow_marker("selected pose", "map")
+
         self.get_logger().info(f"LLM output: {out_LLM}")
         trigger = Empty()
         out_LLM_msg = String()
@@ -403,54 +408,29 @@ class TaskManager(Node):
         print("Assistant:", output)
         return output
 
-    def result_edge(self, LLM_out, edge_list):
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def result_edge(self, LLM_out):
 
         self.out_edge = None
-        self.out_edge_num = None
-        matched_index = None
-        matched_label = None
+        self.out_edge_pose = None
 
-        edges_split = self.edge_list_split(edge_list)
-        lines = edge_list.splitlines()
-
+   
         LLM_lower = LLM_out.casefold()
 
-        # --- 全ラベルをフラット化 ---
-        all_labels = []
+        for labels in self.edges.keys():
+            parts = [p.strip().casefold() for p in labels.split(" / ")]
+            for part in parts:
+                pattern = rf"\b{re.escape(part)}\b"
+                if re.search(pattern, LLM_lower):
+                    self.out_edge = part
+                    self.out_edge_pose = self.edges[labels]
+                    break
 
-        for idx, labels in enumerate(edges_split):
-            for label in labels:
-                all_labels.append((idx, label))
-
-        # --- ラベル長で降順ソート（最長一致優先） ---
-        all_labels.sort(key=lambda x: len(x[1]), reverse=True)
-
-        # --- 全体から最長一致を探す ---
-        for idx, label in all_labels:
-            pattern = rf"\b{re.escape(label.casefold())}\b"
-            if re.search(pattern, LLM_lower):
-                matched_index = idx
-                matched_label = label
-                break
-
-        if matched_index is None:
+        if self.out_edge is None or self.out_edge_pose == None:
             self.get_logger().info("(No matching edge found in LLM output)")
-            return
-
-        # マッチ情報保存
-        self.out_edge = matched_label
-        self.out_edge_num = matched_index + 1
-
-        # 座標抽出
-        match = re.search(r"\(([-\d.]+),\s*([-\d.]+)\)", lines[matched_index])
-        if match:
-            self.edge_x = float(match.group(1))
-            self.edge_y = float(match.group(2))
         else:
-            self.get_logger().info("(Coordinate parse failed)")
-            return
-
-        return self.out_edge
+            self.get_logger().info(f"(Matching Edge: {self.out_edge}: {self.out_edge_pose})")
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def edge_list_split(self, edge_list):
@@ -473,59 +453,57 @@ class TaskManager(Node):
 
         return edges
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def create_arrow_marker(self, name, frame_id="map"):
+        marker = Marker()
 
+        marker.header.frame_id = frame_id
+        marker.header.stamp.sec = 0
+        marker.header.stamp.nanosec = 0
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def result_edge(self, LLM_out, edge_list):
+        marker.ns = "rso2_arrows"
+        marker.id = hash(name) % 10000
 
-        self.out_edge = None
-        self.out_edge_num = None
-        matched_index = None
-        matched_label = None
+        marker.type = Marker.ARROW
+        marker.action = Marker.ADD
 
-        edges_split = self.edge_list_split(edge_list)
-        lines = edge_list.splitlines()
+        # ✅ position from poses[name]
+        marker.pose.position.x = self.out_edge_pose[0]
+        marker.pose.position.y = self.out_edge_pose[1]
+        marker.pose.position.z = 0.0
 
-        LLM_lower = LLM_out.casefold()
+        # ✅ orientation from yaw
+        
+        q=self.yaw_to_quaternion(self.out_edge_pose[2])
+        marker.pose.orientation.x = q[0]
+        marker.pose.orientation.y = q[1] 
+        marker.pose.orientation.z = q[2] 
+        marker.pose.orientation.w = q[3] 
 
-        # --- 全ラベルをフラット化 ---
-        all_labels = []
+        # Arrow size
+        marker.scale.x = 0.6   # length
+        marker.scale.y = 0.1   # width
+        marker.scale.z = 0.1   # height
 
-        for idx, labels in enumerate(edges_split):
-            for label in labels:
-                all_labels.append((idx, label))
+        # Color (RGBA)
+        marker.color.r = 1.0
+        marker.color.g = 0.0
+        marker.color.b = 0.0
+        marker.color.a = 0.5
 
-        # --- ラベル長で降順ソート（最長一致優先） ---
-        all_labels.sort(key=lambda x: len(x[1]), reverse=True)
+        marker.lifetime.sec = 0  # forever
 
-        # --- 全体から最長一致を探す ---
-        for idx, label in all_labels:
-            pattern = rf"\b{re.escape(label.casefold())}\b"
-            if re.search(pattern, LLM_lower):
-                matched_index = idx
-                matched_label = label
-                break
+        self.cposes_pub.publish(marker)
 
-        if matched_index is None:
-            self.get_logger().info("(No matching edge found in LLM output)")
-            return
-
-        # マッチ情報保存
-        self.out_edge = matched_label
-        self.out_edge_num = matched_index + 1
-
-        # 座標抽出
-        match = re.search(r"\(([-\d.]+),\s*([-\d.]+)\)", lines[matched_index])
-        if match:
-            self.edge_x = float(match.group(1))
-            self.edge_y = float(match.group(2))
-        else:
-            self.get_logger().info("(Coordinate parse failed)")
-            return
-
-        return self.out_edge
-
+    def yaw_to_quaternion(eslf, yaw: float) -> list:
+        """Convert yaw angle (rad) to quaternion."""
+        qx = 0.0
+        qy = 0.0
+        qz = math.sin(yaw / 2.0)
+        qw = math.cos(yaw / 2.0)
+        q=[qx,qy,qz,qw]
+        return q
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def main():
