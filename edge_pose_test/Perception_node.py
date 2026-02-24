@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import json
 import vosk
 import sounddevice as sd
