@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import rclpy
 import numpy as np
 import math
@@ -25,13 +26,9 @@ class EdgeLabeling(Node):
         self.latest_edge_text = None
         self.edge_ready = False
 
+        self.encripted_elist = None
+
         # ===== 絶対エッジ番号（テーブル中心基準）=====
-        self.fixed_edges = {
-            "edge_1": np.array([0.75, 0.0]),
-            "edge_2": np.array([0.0, 0.45]),
-            "edge_3": np.array([-0.75, 0.0]),
-            "edge_4": np.array([0.0, -0.45]),
-        }
 
         self.sub_robot = self.create_subscription(
             Marker, "/robot_marker",
@@ -149,6 +146,8 @@ class EdgeLabeling(Node):
 
         yaw = self.quat_to_yaw(tqx, tqy, tqz, tqw)
 
+        self.get_logger().info(f"Tilted angle {math.degrees(yaw)}")
+
         hx, hy = sx / 2.0, sy / 2.0
         c, s = math.cos(yaw), math.sin(yaw)
 
@@ -171,8 +170,8 @@ class EdgeLabeling(Node):
         global_corners=[]
 
         # ===== ロボット→中心ベクトル =====
-        Pc = np.array([robot_x - table_x, robot_y - table_y])
-        angle_TR = np.degrees(np.arctan2(Pc[0], Pc[1]))
+        Pc = np.array([robot_x  - table_x , robot_y - table_y])
+        angle_TR = np.degrees(np.arctan2(Pc[1], Pc[0]))
 
 
         
@@ -181,8 +180,8 @@ class EdgeLabeling(Node):
             cy = lx * s + ly * c
 
             global_corners.append( np.array([cx, cy]) +  np.array([table_x, table_y]) )
-            angle_corner = np.degrees(np.arctan2(cx, cy))
-            theta = (180 - angle_TR - angle_corner + 360.0) % 360.0
+            angle_corner = np.degrees(np.arctan2(cy, cx))
+            theta = (angle_corner - angle_TR + 360.0) % 360.0
             corner_theta.append(theta)
             
         for i,gc in enumerate(global_corners):
@@ -205,7 +204,7 @@ class EdgeLabeling(Node):
 
         # ===== θでソート（右回り）=====
         sorted_theta = sorted(corner_theta, key=lambda x: x)
-        sorted_theta_ind = [sorted_theta.index(t) for t in sorted_theta]
+        sorted_theta_ind = [corner_theta.index(t) for t in sorted_theta]
         sorted_poses= [poses[i] for i in sorted_theta_ind]
 
 
@@ -258,14 +257,15 @@ class EdgeLabeling(Node):
             self.get_logger().info(line)
             buffer+=line
 
-        self.msg_data = buffer
+        self.encripted_elist = buffer
         
 
         
     def publish_edge(self):    
         msg = String()
-        msg.data = self.msg_data
-        self.edge_pub.publish(msg)
+        if self.encripted_elist:
+            msg.data = self.encripted_elist
+            self.edge_pub.publish(msg)
 
 
 def main():
