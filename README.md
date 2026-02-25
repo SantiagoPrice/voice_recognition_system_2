@@ -10,3 +10,6 @@ colcon build --packages-select vint_ros
 
 
 Model sources: https://alphacephei.com/vosk/models
+
+Voice feedback:
+Google Gemini is one option to create audio: https://aistudio.google.com/generate-speech
