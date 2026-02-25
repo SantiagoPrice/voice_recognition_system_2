@@ -13,3 +13,9 @@ Model sources: https://alphacephei.com/vosk/models
 
 Voice feedback:
 Google Gemini is one option to create audio: https://aistudio.google.com/generate-speech
+
+Compilation:
+
+Activate python environment
+
+colcon build --symlink-install --packages-select vint_ros --cmake-args -DPYTHON_EXECUTABLE=$(which python) -DVOSK_DIR=../../src/VOSK_PATH

@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
+
 import rclpy
 import numpy as np
 import math
 from rclpy.node import Node
 from visualization_msgs.msg import Marker
 from std_msgs.msg import String
-
+import json
 
 class EdgeLabeling(Node):
     def __init__(self):
         super().__init__("Edge_Labeling")
 
         self.edge_pub = self.create_publisher(String, "/edge_list", 10)
+        self.cposes_pub = self.create_publisher(Marker, "/cand_poses", 10)
 
         self.state = {
             "robot": {"pos": None, "quat": None, "size": None},
@@ -23,16 +25,10 @@ class EdgeLabeling(Node):
 
         self.latest_edge_text = None
         self.edge_ready = False
-        
-        self.rotated_world_edge = {}
+
+        self.encripted_elist = None
 
         # ===== 絶対エッジ番号（テーブル中心基準）=====
-        self.fixed_edges = {
-            "edge_1": np.array([0.75, 0.0]),
-            "edge_2": np.array([0.0, 0.45]),
-            "edge_3": np.array([-0.75, 0.0]),
-            "edge_4": np.array([0.0, -0.45]),
-        }
 
         self.sub_robot = self.create_subscription(
             Marker, "/robot_marker",
@@ -43,44 +39,8 @@ class EdgeLabeling(Node):
             lambda msg: self.cb_marker(msg, "table"), 10)
 
         self.pub_timer = self.create_timer(1.0, self.publish_edge)
+
     # ------------------------------------------------
-
-    def edge_world(self):
-        table_x, table_y, _ = self.state["table"]["pos"]
-        table_x_size, table_y_size, _ = self.state["table"]["size"]
-        tqx, tqy, tqz, tqw = self.state["table"]["quat"]
-        yaw = self.quat_to_yaw(tqx, tqy, tqz, tqw)
-
-        hx, hy = table_x_size / 2.0, table_y_size / 2.0
-
-        for n in range(4):
-            if n == 0:
-                local_x, local_y = hx, 0.0
-            if n == 1:
-                local_x, local_y = 0.0, hy
-            if n == 2:
-                local_x, local_y = -hx, 0.0
-            if n == 3:
-                local_x, local_y = 0.0, -hy
-            self.rotated_world_edge[n] = np.array(self.rotate_world_angle(local_x, local_y, yaw, table_x, table_y))
-        
-        self.fixed_edges = {
-            "edge_1": np.array([self.rotated_world_edge[0][0], self.rotated_world_edge[0][1]]),
-            "edge_2": np.array([self.rotated_world_edge[1][0], self.rotated_world_edge[1][1]]),
-            "edge_3": np.array([self.rotated_world_edge[2][0], self.rotated_world_edge[2][1]]),
-            "edge_4": np.array([self.rotated_world_edge[3][0], self.rotated_world_edge[3][1]]),
-            }
-
-    def rotate_world_angle(self, x, y, yaw, table_x, table_y):
-        c, s = math.cos(yaw), math.sin(yaw)
-        rotated_x = x * c - y * s
-        rotated_y = x * s + y * c
-        table_world_x = rotated_x + table_x
-        table_world_y = rotated_y + table_y
-
-        return table_world_x, table_world_y
-        
-
     def is_changed(self, prev, curr, eps=1e-3):
         if prev is None:
             return True
@@ -118,8 +78,62 @@ class EdgeLabeling(Node):
 
     def calc_once(self):
         if self.have_all():
-            #self.edge_world(
             self.PoseSelection()
+
+
+    def yaw_to_quaternion(eslf, yaw: float) -> list:
+        """Convert yaw angle (rad) to quaternion."""
+        qx = 0.0
+        qy = 0.0
+        qz = math.sin(yaw / 2.0)
+        qw = math.cos(yaw / 2.0)
+        q=[qx,qy,qz,qw]
+        return q
+
+
+    def create_arrow_marker(self, name, poses, yaw, frame_id="map"):
+        marker = Marker()
+
+        marker.header.frame_id = frame_id
+        marker.header.stamp.sec = 0
+        marker.header.stamp.nanosec = 0
+
+        marker.ns = "rso2_arrows"
+        marker.id = hash(name) % 10000
+
+        marker.type = Marker.ARROW
+        marker.action = Marker.ADD
+
+        # ✅ position from poses[name]
+        marker.pose.position.x = poses[0]
+        marker.pose.position.y = poses[1]
+        marker.pose.position.z = 0.0
+
+        # ✅ orientation from yaw
+        
+        q=self.yaw_to_quaternion(yaw)
+        marker.pose.orientation.x = q[0]
+        marker.pose.orientation.y = q[1] 
+        marker.pose.orientation.z = q[2] 
+        marker.pose.orientation.w = q[3] 
+
+        # Arrow size
+        marker.scale.x = 0.2   # length
+        marker.scale.y = 0.05   # width
+        marker.scale.z = 0.05   # height
+
+        # Color (RGBA)
+        marker.color.r = 0.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.color.a = 0.5
+
+        marker.lifetime.sec = 0  # forever
+
+        self.cposes_pub.publish(marker)
+    
+
+
 
     # ------------------------------------------------
     def PoseSelection(self):
@@ -132,131 +146,125 @@ class EdgeLabeling(Node):
 
         yaw = self.quat_to_yaw(tqx, tqy, tqz, tqw)
 
+        self.get_logger().info(f"Tilted angle {math.degrees(yaw)}")
+
         hx, hy = sx / 2.0, sy / 2.0
         c, s = math.cos(yaw), math.sin(yaw)
 
         # ===== エッジ中心（local）=====
-        local_edges = {
-            "E0": np.array([+hx, 0.0]),
-            "E1": np.array([0.0, +hy]),
-            "E2": np.array([-hx, 0.0]),
-            "E3": np.array([0.0, -hy]),
-        }
 
-        local_corners = {
-                "C0":  np.array([+hx, -hy]),
-                "C1":  np.array([+hx, +hy]),
-                "C2":  np.array([-hx, +hy]),
-                "C3":  np.array([-hx, -hy]),
-                }
+        local_corners = [
+                np.array([+hx, -hy]),
+                np.array([+hx, +hy]),
+                np.array([-hx, +hy]),
+                np.array([-hx, -hy]),
+        ]
 
         world_edges = {}
         local_rotated = {}
         local_rotated_corner = {}
-        local_rotated_edge = {}
-        corner_theta = {}
+        local_rotated_edge = []
+        corner_theta = []
         edge_theta = {}
+        poses = []
+        global_corners=[]
 
         # ===== ロボット→中心ベクトル =====
-        Pc = np.array([robot_x - table_x, robot_y - table_y])
-        angle_TR = np.degrees(np.arctan2(Pc[0], Pc[1]))
+        Pc = np.array([robot_x  - table_x , robot_y - table_y])
+        angle_TR = np.degrees(np.arctan2(Pc[1], Pc[0]))
 
-        for name, (lx, ly) in local_edges.items():
-            ex = lx * c - ly * s
-            ey = lx * s + ly * c
 
-            local_rotated_edge[name] = np.array([ex, ey])
         
-        for name, (lx, ly) in local_corners.items():
+        for i, (lx, ly) in enumerate(local_corners):
             cx = lx * c - ly * s
             cy = lx * s + ly * c
 
-            local_rotated_corner[name] = np.array([cx, cy])
+            global_corners.append( np.array([cx, cy]) +  np.array([table_x, table_y]) )
+            angle_corner = np.degrees(np.arctan2(cy, cx))
+            theta = (angle_corner - angle_TR + 360.0) % 360.0
+            corner_theta.append(theta)
+            
+        for i,gc in enumerate(global_corners):
+            i_before= (i+3)%4
+            edge= global_corners[i]-global_corners[i_before]
+            edge_l= np.linalg.norm(edge)
+            edge_n = np.array([edge[1],-edge[0]])/ edge_l
 
-            angle_corner = np.degrees(np.arctan2(cx, cy))
-            theta = (angle_TR - angle_corner + 360.0) % 360.0
-            corner_theta[name] = theta
+            pose_loc = gc - edge * 0.5 + 0.5*edge_n
+
+            pose_loc_c = pose_loc - np.array([table_x, table_y])
+
+            print(f"Pose locaton: {pose_loc}")
+        
+            pose_yaw = math.atan2( -pose_loc_c[1], -pose_loc_c[0])
+            
+            pose_mark = self.create_arrow_marker(f"C{i}", pose_loc , pose_yaw)
+            poses.append([pose_loc , pose_yaw])
 
 
         # ===== θでソート（右回り）=====
-        sorted_corner = sorted(corner_theta.items(), key=lambda x: x[1])
-        order = [e[0] for e in sorted_corner]
-        # エッジの名前順番入れ替え
-        original_corner_names = list(local_corners.keys())
-        sort_idx = [original_corner_names.index(name) for name in order]
-        edge_names = list(local_edges.keys())
-        edge_order = [edge_names[i] for i in sort_idx]
+        sorted_theta = sorted(corner_theta, key=lambda x: x)
+        sorted_theta_ind = [corner_theta.index(t) for t in sorted_theta]
+        sorted_poses= [poses[i] for i in sorted_theta_ind]
+
 
         # ===== semanticラベル =====
-        THETA_A = 15.0
+        THETA_A = 10.0
 
-        if sorted_corner[0][1] < THETA_A:
-            labels = ["Near Left Edge",
-                      "Near Right Edge",
-                      "Far Right Edge",
-                      "Far Left Edge"]
-        elif sorted_corner[3][1] < (360.0 - THETA_A):
-            labels = ["Near Edge",
-                    "Right Edge",
-                    "Far Edge",
-                    "Left Edge"]
+        GAMMA = (sorted_theta[0] + (360.0 - sorted_theta[3])) / 2  
+
+        if sorted_theta[0] < THETA_A:                       # Right Reference corner INSIDE the cone
+            labels = ["Near left edge / Near edge",
+                      "Near right edge / Right edge",
+                      "Far right edge / Far edge",
+                      "Far left edge / Left edge"]
+
+        elif sorted_theta[3] < (360.0 - THETA_A):           # NO corner INSIDE the cone, line connecting corner and center passes at the RIGHT of the wheelchair
+            if sorted_theta[0] < GAMMA:                            # Simmetry axis of the near edge passes at the LEFT of the wheelchair 
+                labels = ["Near edge / Near Left edge",
+                        "Right edge / Near Right edge",
+                        "Far edge / Far Right edge",
+                        "Left edge / Far Left edge"]
+            elif sorted_theta[0] > GAMMA:                          # Simmetry axis of the near edge passes at the LEFT of the wheelchair center
+                labels = ["Near edge / Near Right edge",
+                        "Right edge / Far Right edge",
+                        "Far edge / Far Left edge",
+                        "Left edge / Near Left edge"]
+            else:                                                  # Simmetry axis of the near edge crosses the wheelchair center
+                labels = ["Near edge / Near edge",
+                        "Right edge / Right edge",
+                        "Far edge / Far edge",
+                        "Left edge / Left edge"]
         else:
-            labels = ["Near Right Edge",
-                      "Far Right Edge",
-                      "Far Left Edge",
-                      "Near Left Edge"]
+            labels = ["Near right edge / Near edge",       # Left Reference corner INSIDE the cone
+                      "Far right edge / Right edge",
+                      "Far left edge / Far edge",
+                      "Near left edge / Left edge"]
 
         semantic_map = {}
-        for phys, label in zip(order, labels):
-            semantic_map[phys] = label
 
-        # =================================================
-        # 循環割当（修正版）
-        # =================================================
 
-        ref_phys = edge_order[0]
+        self.lab_poses = dict (zip(labels,sorted_poses))
+        
 
-        min_d = float("inf")
-        ref_edge_id = None
-        comp_edge = {} 
-
-        # ★ 修正：local_rotated で比較
-        for edge_id, fixed_pos in self.fixed_edges.items():
-            d = np.linalg.norm(local_rotated_edge[ref_phys] - fixed_pos)
-            if d < min_d:
-                min_d = d
-                ref_edge_id = edge_id
-
-        edge_ids = ["edge_1", "edge_2", "edge_3", "edge_4"]
-        ref_index = edge_ids.index(ref_edge_id)
-
-        assignment = {}
-
-        for i in range(4):
-            edge_id = edge_ids[(ref_index + i) % 4]
-            assignment[edge_id] = order[i]
-
-        # ===== 出力 =====
-        lines = []
-
+        buffer=""
         self.get_logger().info("-----------------------------------")
-        for edge_id in edge_ids:
-            phys = assignment[edge_id]
-            sem = semantic_map[phys]
-            x, y = self.fixed_edges[edge_id]
-
-            line = f"{edge_id}: {sem} / ({x:.2f}, {y:.2f})"
-            lines.append(line)
+        for label, pose_data in zip(labels,sorted_poses):
+            X = pose_data[0][0]
+            Y = pose_data[0][1]
+            YAW = pose_data[1]
+            line = f"{label}//({X:.2f},{Y:.2f},{YAW:.2f})\n"
             self.get_logger().info(line)
+            buffer+=line
 
-        self.latest_edge_text = "\n".join(lines)
-        self.edge_ready = True
+        self.encripted_elist = buffer
+        
 
-    # ------------------------------------------------
-    def publish_edge(self):
-        if self.edge_ready:
-            msg = String()
-            msg.data = self.latest_edge_text
+        
+    def publish_edge(self):    
+        msg = String()
+        if self.encripted_elist:
+            msg.data = self.encripted_elist
             self.edge_pub.publish(msg)
 
 

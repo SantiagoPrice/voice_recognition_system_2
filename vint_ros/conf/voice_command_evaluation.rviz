@@ -8,6 +8,11 @@ Panels:
         - /Status1
         - /Reference1
         - /Legs1
+        - /Target1
+        - /Target1/Topic1
+        - /Target1/Namespaces1
+        - /Axes1
+        - /Axes2
       Splitter Ratio: 0.5
     Tree Height: 1758
   - Class: rviz_common/Selection
@@ -21,7 +26,6 @@ Panels:
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
-      - /Current View1/Focal Point1
     Name: Views
     Splitter Ratio: 0.5
   - Class: rviz_common/Time
@@ -54,7 +58,7 @@ Visualization Manager:
       Enabled: true
       Name: Predicted edge
       Namespaces:
-        LLM_outline: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -67,7 +71,7 @@ Visualization Manager:
       Enabled: true
       Name: Reference
       Namespaces:
-        target_point: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -115,10 +119,37 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /legs_marker
       Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Target
+      Namespaces:
+        rso2_arrows: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /select_poses
+      Value: true
+    - Class: rviz_default_plugins/Axes
+      Enabled: true
+      Length: 1
+      Name: Axes
+      Radius: 0.10000000149011612
+      Reference Frame: robot_base
+      Value: true
+    - Class: rviz_default_plugins/Axes
+      Enabled: false
+      Length: 1
+      Name: Axes
+      Radius: 0.10000000149011612
+      Reference Frame: map
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: robot_base
+    Fixed Frame: table
     Frame Rate: 30
   Name: root
   Tools:
@@ -160,26 +191,21 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz_default_plugins/Orbit
-      Distance: 3.7461297512054443
+      Angle: -0.014999846927821636
+      Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
-      Focal Point:
-        X: 0
-        Y: 0
-        Z: 1.2000000476837158
-      Focal Shape Fixed Size: true
-      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.16539856791496277
+      Scale: 292.8951416015625
       Target Frame: <Fixed Frame>
-      Value: Orbit (rviz)
-      Yaw: 0
+      Value: TopDownOrtho (rviz_default_plugins)
+      X: 0
+      Y: 0
     Saved: ~
 Window Geometry:
   Displays:

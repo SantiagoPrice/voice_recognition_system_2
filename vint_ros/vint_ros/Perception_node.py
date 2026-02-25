@@ -29,9 +29,16 @@ from geometry_msgs.msg import Point
 from std_msgs.msg import String
 
 #---------------------------------------------------
+robot_x = 0.0
+robot_y = -1.5
+robot_yaw_deg = 270.0
+robot_name = "robot"
+robot_size_x = 0.5
+robot_size_y = 0.5
+robot_size_z = 1.0
 table_x = 0.0
 table_y = 0.0
-table_yaw_deg = 270.0
+table_yaw_deg = 0.0 
 table_name = "table"
 table_size_x = 1.5
 table_size_y = 0.9
@@ -40,14 +47,6 @@ table_thick=0.07
 
 leg_width=0.1
 
-
-robot_x = 3.0
-robot_y = 2.0
-robot_yaw_deg = 0.0
-robot_name = "robot"
-robot_size_x = 0.5
-robot_size_y = 0.5
-robot_size_z = 1.0
 
 THETA_A = 15.0
 
@@ -59,7 +58,7 @@ corners = [
         (((table_x-table_hsize_x)*math.cos(table_yaw_deg)), ((table_y-table_hsize_y)*(-math.sin(table_yaw_deg))), table_size_z),
         (((table_x+table_hsize_x)*math.cos(table_yaw_deg)), ((table_y-table_hsize_y)*(-math.sin(table_yaw_deg))), table_size_z)
         ]
-
+corner_ijkl = np.zeros((4,5))
 robot_yaw_rad = math.radians(robot_yaw_deg)
 Robot = np.array([robot_x, robot_y, robot_yaw_deg, robot_yaw_rad, robot_name]) 
 table_yaw_rad = math.radians(table_yaw_deg)
@@ -70,10 +69,9 @@ class MapBroadcaster(Node):
     def __init__(self):
         super().__init__('map_broadcaster')
         self.tf_broadcaster = TransformBroadcaster(self)
-        
-
         #---- publish ----#
         self.table_marker_pub = self.create_publisher(Marker, '/table_marker', 10)
+        self.legs_marker_pub = self.create_publisher(Marker, '/legs_marker', 10)
         self.robot_marker_pub = self.create_publisher(Marker, '/robot_marker', 10)
         self.RtoT_marker_pub = self.create_publisher(Marker, '/RtoT_marker', 10)
         self.Tcon_marker_pub = self.create_publisher(Marker, '/Tcon_marker', 10)
@@ -100,8 +98,11 @@ class MapBroadcaster(Node):
         global robot_y
         global robot_yaw_deg
         global robot_yaw_rad
+        global table_size_x
+        global table_size_y
+        global table_height
+        robot_x, robot_y, robot_yaw_deg, table_size_x, table_size_y, table_height, self.dummy_value = msg.data
         
-        robot_x, robot_y, robot_yaw_deg, self.dummy_value = msg.data
         robot_yaw_rad = math.radians(robot_yaw_deg)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -187,10 +188,10 @@ class MapBroadcaster(Node):
         m_legs.id = 0
         m_legs.type = Marker.CUBE_LIST
         m_legs.action = Marker.ADD
-        # first_leg_position
-        table_height = table_size_z
-        m_legs.pose.position.x = float(table_x)+float(table_x)/2#-leg_width
-        m_legs.pose.position.y = float(table_y)+float(table_y)/2#-leg_width
+
+        # leg_frame_orientation
+        m_legs.pose.position.x = m_table.pose.position.x 
+        m_legs.pose.position.y = m_table.pose.position.y 
         m_legs.pose.position.z = (table_height-table_thick)/2#table_height / 2.0
         m_legs.pose.orientation.x = q_table[0]
         m_legs.pose.orientation.y = q_table[1]
@@ -220,7 +221,9 @@ class MapBroadcaster(Node):
         m_legs.color.b = 1.0
         m_legs.color.a = 1.0
         m_legs.lifetime = Duration(sec=0, nanosec=0)
-        self.table_marker_pub.publish(m_legs)
+
+        self.legs_marker_pub.publish(m_legs)
+        
 
         # ---robot_Marker---
         m_robot = Marker()
@@ -264,6 +267,15 @@ class MapBroadcaster(Node):
         m_Tcon.color.g = 0.3
         m_Tcon.color.b = 0.0
         m_Tcon.color.a = 1.0
+        
+        table_hsize_x = table_size_x / 2
+        table_hsize_y = table_size_y / 2
+        corners = [
+                ((table_x+table_hsize_x), (table_y+table_hsize_y), table_height),
+                ((table_x-table_hsize_x), (table_y+table_hsize_y), table_height),
+                ((table_x-table_hsize_x), (table_y-table_hsize_y), table_height),
+                ((table_x+table_hsize_x), (table_y-table_hsize_y), table_height)
+                ] 
         for corner in corners:
             start = Point()
             start.x, start.y, start.z = table_x, table_y, (table_size_z)
