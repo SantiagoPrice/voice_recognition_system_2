@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+#ros2 topic pub /command std_msgs/msg/String "{data: 'Right Edge'}"
+
 import sys
 import os
 

@@ -214,31 +214,31 @@ class EdgeLabeling(Node):
         GAMMA = (sorted_theta[0] + (360.0 - sorted_theta[3])) / 2  
 
         if sorted_theta[0] < THETA_A:                       # Right Reference corner INSIDE the cone
-            labels = ["Near left edge / Near edge",
-                      "Near right edge / Right edge",
-                      "Far right edge / Far edge",
-                      "Far left edge / Left edge"]
+            labels = ["Near left edge / Close edge",
+                      "Right Near edge / Right edge",
+                      "Right Far edge / Far edge",
+                      "Left Far edge / Left edge"]
 
         elif sorted_theta[3] < (360.0 - THETA_A):           # NO corner INSIDE the cone, line connecting corner and center passes at the RIGHT of the wheelchair
             if sorted_theta[0] < GAMMA:                            # Simmetry axis of the near edge passes at the LEFT of the wheelchair 
-                labels = ["Near edge / Near Left edge",
-                        "Right edge / Near Right edge",
-                        "Far edge / Far Right edge",
-                        "Left edge / Far Left edge"]
+                labels = ["Close edge / Left Near edge",
+                        "Right edge / Right Near edge",
+                        "Far edge / Right Far edge",
+                        "Left edge / Left Far edge"]
             elif sorted_theta[0] > GAMMA:                          # Simmetry axis of the near edge passes at the LEFT of the wheelchair center
-                labels = ["Near edge / Near Right edge",
-                        "Right edge / Far Right edge",
-                        "Far edge / Far Left edge",
-                        "Left edge / Near Left edge"]
+                labels = ["Close edge / Right Near edge",
+                        "Right edge / Right Far edge",
+                        "Far edge / Left Far edge",
+                        "Left edge / Left Near edge"]
             else:                                                  # Simmetry axis of the near edge crosses the wheelchair center
-                labels = ["Near edge / Near edge",
+                labels = ["Close edge / Close edge",
                         "Right edge / Right edge",
                         "Far edge / Far edge",
                         "Left edge / Left edge"]
         else:
-            labels = ["Near right edge / Near edge",       # Left Reference corner INSIDE the cone
-                      "Far right edge / Right edge",
-                      "Far left edge / Far edge",
+            labels = ["Right Near edge / Close edge",       # Left Reference corner INSIDE the cone
+                      "Right Far edge / Right edge",
+                      "Left Far edge / Far edge",
                       "Near left edge / Left edge"]
 
         semantic_map = {}

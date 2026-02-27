@@ -60,8 +60,9 @@ class Assessment(Node):
         self.target_point_pub = self.create_publisher(Marker, '/target_point', 10)
         self.arrow_marker = self.create_timer(1.0, self.publish_arrow_marker)    
         self.LLM_out_line_pub = self.create_publisher(Marker, '/LLM_out_line', 10)
-        self.LLM_marker = self.create_timer(0.1, self.publish_LLM_out_marker)    
-        self.map_update_pub = self.create_publisher(Float32MultiArray, '/map_update', 10) 
+        self.LLM_marker = self.create_timer(0.1, self.publish_arrow_marker)    
+        self.map_update_pub = self.create_publisher(Float32MultiArray, '/map_update', 10)
+        self.cposes_pub = self.create_publisher(Marker, "/select_poses", 10) 
 
         # ---- subscribe ----
         self.sub_table = self.create_subscription(Marker,
@@ -134,7 +135,7 @@ class Assessment(Node):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def LLM_out_cb(self, msg: String):
-        lab_reps = msg.data.split(" / ")
+        lab_reps = msg.data.split(" // ")
         self.LLM_lab = lab_reps[0]
         self.LLM_out = lab_reps[1]
         self.get_logger().info("LLM out received")
@@ -190,7 +191,7 @@ class Assessment(Node):
         self.get_logger().info(f"LLM response: {self.LLM_out}")
 
 
-        T_or_F = self.out_goal_comp(self.LLM_lab in self.target_edge)
+        T_or_F = self.LLM_lab.casefold() in self.target_edge.casefold()
 
         self.get_logger().info(f"Result: {T_or_F}")
         
@@ -206,7 +207,7 @@ class Assessment(Node):
         
         #~~~~~~~~~~~~~~次のループ開始~~~~~~~~~~~~~~~~~~~~#
         values = Float32MultiArray()
-        self.goal_num = random.randint(1, 4)
+        self.goal_num = random.randint(0, 3)
         while True:
             self.robot_x = round(random.uniform(-3, 3), 1)
             self.robot_y = round(random.uniform(-3, 3), 1)
@@ -229,6 +230,10 @@ class Assessment(Node):
                 self.table_size_x, self.table_size_y, self.table_size_h, 1.0]
         self.map_update_pub.publish(values)
 
+        msg = Marker()
+        msg.action = Marker.DELETEALL
+        self.cposes_pub .publish(msg)
+
         # ===== リセット =====
         self.prediction_requested = False
         self.LLM_out = None
@@ -246,7 +251,7 @@ class Assessment(Node):
     def publish_arrow_marker(self):
         # ----- arrow ------#
         now = self.get_clock().now().to_msg()
-        if self.state["table"]["pos"] is None:
+        if self.edge_list is None:
             return
 
         arrow = Marker()
@@ -280,9 +285,9 @@ class Assessment(Node):
         arrow.scale.z = 0.1   # height
 
         # 矢印の太さ
-        arrow.scale.x = 0.075  # シャフト径
-        arrow.scale.y = 0.21   # ヘッド径
-        arrow.scale.z = 0.21   # ヘッド長
+        arrow.scale.x = 0.6  # シャフト径
+        arrow.scale.y = 0.1   # ヘッド径
+        arrow.scale.z = 0.1   # ヘッド長
         arrow.color.r = 1.0
         arrow.color.g = 0.0
         arrow.color.b = 0.0

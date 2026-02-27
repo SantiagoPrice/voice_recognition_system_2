@@ -164,19 +164,19 @@ class TaskManager(Node):
         self.get_logger().info(f"received command {command_text}")
         e_names= list(self.edges.keys())
 
-        if any("Near edge" in e for e in e_names):
+        if any("Close edge" in e for e in e_names):
             self.case = "case1"
             out_LLM = "OK, I will take you Right                                                                                                                                                                                                                                     edge"
             #out_LLM = self.LLM_edge_case1(command_text)
-            # out_LLM = self.LLM_edge_case_both(command_text)
+            out_LLM = self.LLM_edge_case_both(command_text)
 
-        elif any("Near right edge" in e for e in e_names):
+        elif any("Right Near edge" in e for e in e_names):
             self.case = "case2"
-            out_LLM = "OK, I will take you Far Right edge"
+            out_LLM = "OK, I will take you Right Far edge"
             #out_LLM = self.LLM_edge_case2(command_text)
-            # out_LLM = self.LLM_edge_case_both(command_text)
+            out_LLM = self.LLM_edge_case_both(command_text)
 
-        out_LLM="Near Edge"
+        #out_LLM="Near Edge"
 
         self.result_edge(out_LLM)
 
@@ -188,18 +188,18 @@ class TaskManager(Node):
         self.get_logger().info(f"LLM output: {out_LLM}")
 
         if self.out_edge is None:
-            self.get_logger().warn("No edge was detected")
+            self.get_logger().warn(f"No edge was detected: {command_text}")
         else:
             self.create_arrow_marker("selected pose", "map")
 
-        trigger = Empty()
-        out_LLM_msg = String()
-        out_LLM_msg.data = self.out_edge + " // " + out_LLM
-        
+            trigger = Empty()
+            out_LLM_msg = String()
+            out_LLM_msg.data = self.out_edge + " // " + out_LLM
+            
 
-        self.LLM_out.publish(out_LLM_msg)
-        self.prediction.publish(trigger)
-        self.get_logger().info(f"prediction trigger")
+            self.LLM_out.publish(out_LLM_msg)
+            self.prediction.publish(trigger)
+            self.get_logger().info(f"prediction trigger")
         
 
     def both_ready(self) -> bool:
@@ -302,13 +302,13 @@ class TaskManager(Node):
         You are an assistant AI mounted on a wheelchair.
         You are currently near a rectangular table, and there are four possible corner positions around it:
 
-        Near Right Edge – near side + right side
+        Right Near edge – near side + right side
 
-        Far Right Edge – far side + right side
+        Right Far Edge – far side + right side
 
-        Far Left Edge – far side + left side
+        Left Far Edge – far side + left side
 
-        Near Left Edge – near side + left side
+        Left Near Edge – near side + left side
 
         When the user makes a request, determine the most suitable position only if you can identify it with complete certainty.
         If there is any risk of choosing the wrong position, you must respond with “I don't know.”
@@ -316,10 +316,9 @@ class TaskManager(Node):
         Your response must follow these rules:
 
         Your output must include exactly one of the following options:
-        “Near Right Edge”, “Far Right Edge”, “Far Left Edge”, “Near Left Edge”, or “I don't know”.
+        “Right Near edge”, “Right Far Edge”, “Left Far Edge”, “Left Near Edge”, or “I don't know”.
 
-        Never output more than one of these labels in a single response.
-
+        Never output more than one of theseNear 
         If you are not completely certain, respond only with “I don't know.”
 
         If you can determine the correct position, respond politely in one or two sentences and include the chosen label.
@@ -364,12 +363,12 @@ class TaskManager(Node):
         In the second situation, the table is not perpendicular to you, but you still look towards the center of it.
         There are four possible edge positions around the table named based on the closest corner to you. The corner is shared by the near edges.
 
-        Near Right Edge - Edge at the right side of the near corner  
-        Near Left Edge – Edge at the left side of the near corner
+        Right Near edge - Edge at the right side of the near corner  
+        Left Near Edge – Edge at the left side of the near corner
 
         The furthest corner is localated in the opposite side of the nearest one. This corner is shared by the far edges
-        Far Left Edge – Edge at the left side of the far corner
-        Far Right Edge – Edge at the right side of the far corner
+        Left Far Edge – Edge at the left side of the far corner
+        Right Far Edge – Edge at the right side of the far corner
 
         When the user makes a request, infere which situation is happening and determine the most suitable position only if you can identify it with complete certainty.
         If there is any risk of choosing the wrong position, you must respond with “I don't know.”
@@ -380,7 +379,7 @@ class TaskManager(Node):
         “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”,
          
         Your output must include exactly one of the following options if you think your arein the second situation:
-        “Near Right Edge”, “Far Right Edge”, “Far Left Edge”, “Near Left Edge”,
+        “Right Near edge”, “Right Far Edge”, “Left Far Edge”, “Left Near Edge”,
 
         Never output more than one of these labels in a single response.
         If you are not completely certain, respond only with “I don't know.”
@@ -396,24 +395,24 @@ class TaskManager(Node):
 
         Situation 1: Facing a Table Edge Directly
 
-        * Near Edge: The edge you are currently facing.
-        * Far Edge: The edge directly opposite the Near Edge.
+        * Close Edge: The edge you are currently facing.
+        * Far Edge: The edge directly opposite the Close Edge.
         * Right Edge: The right side of the table, relative to your forward direction.
         * Left Edge: The left side of the table, relative to your forward direction.
 
         Situation 2: Table Not Perpendicular - Viewing Towards Center
 
-        * Near Right Edge: The right side of the near corner closest to you.
-        * Far Right Edge: The right side of the far corner, opposite the near corner.
-        * Far Left Edge: The left side of the far corner, opposite the near corner.
-        * Near Left Edge: The left side of the near corner closest to you.
+        * Right Near edge: The right side of the near corner closest to you.
+        * Right Far Edge: The right side of the far corner, opposite the near corner.
+        * Left Far Edge: The left side of the far corner, opposite the near corner.
+        * Left Near Edge: The left side of the near corner closest to you.
 
         Important Considerations:
 
         * The "back side" of the table refers to the edge directly opposite the edge you are facing.
         * When the table is not perpendicular, the "Near/Close/Front" and "Far/Back/Opposite" designations refer to the two corners closest and farthest from your current position, respectively.
         * If you are unsure about the user's request, respond with "I don't know."
-        * Your output must include exactly one of the edges labels: “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”, “Near Right Edge”, “Far Right Edge”, “Far Left Edge”, “Near Left Edge”
+        * Your output must include exactly one of the edges labels: “Right Near edge”, “Right Far Edge”, “Left Far Edge”, “Left Near Edge” , “Close Edge”, “Far Edge”, “Right Edge”, “Left Edge”
 
         User Request:
         "{text}"
@@ -430,14 +429,18 @@ class TaskManager(Node):
    
 
         #response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+
+        result = response.json()
+
+        print (result)
         
-        output = response.text
-        #try:
-        #    output = result["choices"][0]["message"]["content"]
-        #except KeyError:
-        #    print("KeyError in result, full content:", result)
-        #    raise
-        print("Assistant:", output)
+        try:
+           output = result["choices"][0]["message"]["content"]
+        except KeyError:
+           self.get_logger().error(f"KeyError in result, full content: {result}")
+           
+           raise
+       
         return output
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -457,7 +460,7 @@ class TaskManager(Node):
                 if re.search(pattern, LLM_lower):
                     self.out_edge = part
                     self.out_edge_pose = self.edges[labels]
-                    break
+                    return
 
         if self.out_edge is None or self.out_edge_pose == None:
             self.get_logger().info("(No matching edge found in LLM output)")
@@ -504,7 +507,7 @@ class TaskManager(Node):
         marker.color.b = 0.0
         marker.color.a = 0.5
 
-        marker.lifetime.sec = 0  # forever
+        marker.lifetime.sec = 3  # forever
 
         self.cposes_pub.publish(marker)
 
