@@ -31,4 +31,11 @@ def generate_launch_description():
             output='log',
             arguments=['--ros-args', '--log-level', 'warn']
         ),
+        Node(
+            package='vint_ros',
+            executable='Goal_to_Nav2_node.py',
+            name='Goal to Nav2',
+            output='log',
+            arguments=['--ros-args', '--log-level', 'warn']
+        ),
     ])
