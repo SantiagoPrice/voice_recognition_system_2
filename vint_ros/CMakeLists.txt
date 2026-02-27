@@ -25,9 +25,14 @@ install(PROGRAMS
 
 
 # Install configuration files
-install(DIRECTORY conf
+install(
+  DIRECTORY
+    conf
+    others
   DESTINATION share/${PROJECT_NAME}
 )
+
+
 
 
 # Install launch files

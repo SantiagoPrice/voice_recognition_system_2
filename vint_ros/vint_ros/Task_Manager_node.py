@@ -1,34 +1,15 @@
 #!/usr/bin/env python3
 
-import sys
 import os
-import json
-import vosk
-import sounddevice as sd
-import queue
-import threading
 import rclpy
 import requests
-import time
-import numpy as np
-# import pyttsx3
 from google import genai
 import math
-import random
 from rclpy.node import Node
-from rclpy.parameter import Parameter as RclpyParameter
-from rclpy.executors import MultiThreadedExecutor
-from rcl_interfaces.msg import Parameter as MsgParameter, ParameterType, ParameterValue
-from rcl_interfaces.srv import SetParameters
 from ament_index_python.packages import get_package_share_directory
-from geometry_msgs.msg import TransformStamped, PoseStamped
 from visualization_msgs.msg import Marker
-from tf2_ros import TransformBroadcaster
-from builtin_interfaces.msg import Duration
-from geometry_msgs.msg import Point
 from std_msgs.msg import String
 from std_msgs.msg import Empty
-from std_msgs.msg import Int32
 import ast
 import re
 import yaml
@@ -38,6 +19,7 @@ from ament_index_python.packages import get_package_share_directory
 
 pkg_path = get_package_share_directory('vint_ros')
 API_PATH = os.path.join(pkg_path,'conf/conf.yaml')
+PROMPT_PATH = os.path.join(pkg_path,'others/prompts.yaml')
 
 
 with open(API_PATH, "r") as f:
@@ -46,33 +28,8 @@ with open(API_PATH, "r") as f:
     API_KEY_OR = conf_handlr["key_or"]
 
 
-
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
-
-client = genai.Client(api_key=API_KEY)
-
-# engine = pyttsx3.init()
-# engine.setProperty("rate", 150)
-# engine.setProperty("volume", 1.0)
-
-headers = {
-        "Authorization": f"Bearer {API_KEY_OR}",
-        "Content-Type": "application/json"
-        }
-
-q = queue.Queue()
-
-
-#!/usr/bin/env python3
-import rclpy
-from rclpy.node import Node
-from std_msgs.msg import String
-
-
-#!/usr/bin/env python3
-import rclpy
-from rclpy.node import Node
-from std_msgs.msg import String
+with open(PROMPT_PATH, "r") as f:
+    prompt_handlr= yaml.safe_load(f)
 
 
 class TaskManager(Node):
@@ -85,6 +42,7 @@ class TaskManager(Node):
         self.edge_received_once = False
         self.cmd_last = None
         self.cmd_received_once = False
+        self.prompts = prompt_handlr
         
         # ---- subscriptions ----
         self.sub_edge = self.create_subscription(String, "/edge_list", self.cb_edge, 10)
@@ -94,7 +52,16 @@ class TaskManager(Node):
         self.prediction = self.create_publisher(Empty, "/prediction", 10)
         self.LLM_out = self.create_publisher(String, "/LLM_out", 10)
         self.cposes_pub = self.create_publisher(Marker, "/select_poses", 10)
+
+        if API_KEY:
+            self.source = "Genai"
+        elif API_KEY_OR:
+            self.source="Open Router"
+        else:
+            raise ValueError("NO API key")
         
+        self.get_logger().info(f"LLM connected via {self.source}")
+           
 
     def cb_edge(self, msg: String):
         text = msg.data.strip()
@@ -157,33 +124,10 @@ class TaskManager(Node):
         if self.edges is None:
             return
 
-        """
-        self.get_logger().info(f"Command updated: {command_text}")
-        out_LLM = self.LLM(command_text)
-        """
         self.get_logger().info(f"received command {command_text}")
-        e_names= list(self.edges.keys())
-
-        if any("Close edge" in e for e in e_names):
-            self.case = "case1"
-            out_LLM = "OK, I will take you Right                                                                                                                                                                                                                                     edge"
-            #out_LLM = self.LLM_edge_case1(command_text)
-            out_LLM = self.LLM_edge_case_both(command_text)
-
-        elif any("Right Near edge" in e for e in e_names):
-            self.case = "case2"
-            out_LLM = "OK, I will take you Right Far edge"
-            #out_LLM = self.LLM_edge_case2(command_text)
-            out_LLM = self.LLM_edge_case_both(command_text)
-
-        #out_LLM="Near Edge"
-
+        out_LLM = self.LLM(command_text,"pose_select_both")
         self.result_edge(out_LLM)
-
-
-
-
-        
+       
 
         self.get_logger().info(f"LLM output: {out_LLM}")
 
@@ -206,242 +150,32 @@ class TaskManager(Node):
         return self.edge_received_once and self.cmd_received_once
         
         
-    def LLM(self, text):
-        base_prompt = """
-        You are a friendly AI assistant built into an electric wheelchair used in a bedroom. 
-        The room has destinations: 
-        - bed
-        - table. 
-        commands
-        - stop
-        When the user speaks, always respond in one short, natural English sentence that clearly includes the destination or commands
-        Do not ask questions. Instead, acknowledge the user’s state in a warm way and declare the action to move to the destination or commands. 
-        The response should sound natural when read aloud by a speaker. 
-        If you get the word "assistant" from the User, you have to response "Hello, How can I help you."
-        Examples: 
-        User: “I’m hungry.” 
-        Assistant: “Alright, let’s move to the table so you can eat.” 
-        User: “I’m sleepy.” 
-        Assistant: “Got it, heading to the bed now.”
+    def LLM(self, text , prompt_key):
 
-        User: 
-        """
+        base_prompt= self.prompts[prompt_key]
         prompt = base_prompt + text
-        print(prompt)
-        data = {
-                "model": "google/gemma-3n-e4b-it:free",
-                "messages": [{"role": "user", "content": prompt}]
-                }
-        response = requests.post(API_URL, json=data, headers=headers)
-   
 
-        response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+        if self.source=="Open Router":
+            API_URL = "https://openrouter.ai/api/v1/chat/completions"
+            headers = {"Authorization": f"Bearer {API_KEY_OR}","Content-Type": "application/json"}
+            data = {"model": "google/gemma-3n-e4b-it:free","messages": [{"role": "user", "content": prompt}]}
+            
+            result = requests.post(API_URL, json=data, headers=headers)
+
+            try:
+                output = result["choices"][0]["message"]["content"]
+            except KeyError:
+                print("KeyError in result, full content:", result)
+
+        else:
+            client = genai.Client(api_key=API_KEY)
+            response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+            output = response.text
         
-        output = response.text
-        #try:
-        #    output = result["choices"][0]["message"]["content"]
-        #except KeyError:
-        #    print("KeyError in result, full content:", result)
-        #    raise
+
         print("Assistant:", output)
         return output
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def LLM_edge_case1(self, text):
-        base_prompt = """
-        You are an assistant AI mounted on a wheelchair.
-        You are currently near a rectangular table, and there are four possible positions around it:
-
-        Near Edge – the side of the table closest to the wheelchair
-
-        Far Edge – the side farthest from the wheelchair
-
-        Right Edge – the right side of the table relative to the wheelchair’s forward direction
-
-        Left Edge – the left side of the table relative to the wheelchair’s forward direction
-
-        When the user makes a request, determine the most suitable position only if you can identify it with complete certainty.
-        If there is any possibility of making an incorrect choice, you must respond with “I don't know.”
-
-        Your response must follow these rules:
-
-        Your output must include exactly one of the following options:
-        “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”, or “I don't know”.
-
-        Never output more than one of these labels in a single response.
-
-        If you are not completely certain, respond only with “I don't know.”
-
-        If you can determine the correct position, respond politely in one or two sentences and include the chosen label.
-
-        User request:
-        """
-        prompt = base_prompt + text
-        print(prompt)
-        data = {
-                "model": "google/gemma-3n-e4b-it:free",
-                "messages": [{"role": "user", "content": prompt}]
-                }
-        #response = requests.post(API_URL, json=data, headers=headers)
-   
-
-        response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
-        
-        output = response.text
-        #try:
-        #    output = result["choices"][0]["message"]["content"]
-        #except KeyError:
-        #    print("KeyError in result, full content:", result)
-        #    raise
-        print("Assistant:", output)
-        return output
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def LLM_edge_case2(self, text):
-        base_prompt = """
-        You are an assistant AI mounted on a wheelchair.
-        You are currently near a rectangular table, and there are four possible corner positions around it:
-
-        Right Near edge – near side + right side
-
-        Right Far Edge – far side + right side
-
-        Left Far Edge – far side + left side
-
-        Left Near Edge – near side + left side
-
-        When the user makes a request, determine the most suitable position only if you can identify it with complete certainty.
-        If there is any risk of choosing the wrong position, you must respond with “I don't know.”
-
-        Your response must follow these rules:
-
-        Your output must include exactly one of the following options:
-        “Right Near edge”, “Right Far Edge”, “Left Far Edge”, “Left Near Edge”, or “I don't know”.
-
-        Never output more than one of theseNear 
-        If you are not completely certain, respond only with “I don't know.”
-
-        If you can determine the correct position, respond politely in one or two sentences and include the chosen label.
-
-        User request:
-        """
-        prompt = base_prompt + text
-        print(prompt)
-        data = {
-                "model": "google/gemma-3n-e4b-it:free",
-                "messages": [{"role": "user", "content": prompt}]
-                }
-        #response = requests.post(API_URL, json=data, headers=headers)
-   
-
-        response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
-        
-        output = response.text
-        #try:
-        #    output = result["choices"][0]["message"]["content"]
-        #except KeyError:
-        #    print("KeyError in result, full content:", result)
-        #    raise
-        print("Assistant:", output)
-        return output
-
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def LLM_edge_case_both(self, text):
-        base_prompt = """
-        You are an assistant AI mounted on a wheelchair.
-        You are currently near a rectangular table, and two possible situations may happen:
-
-        In the first situation you are directly facing one of the table edges. The edges names are the following ones:
-
-        Near Edge – the side you are looking at
-        Far Edge – the side farthest from the wheelchair
-        Right Edge – the right side of the table relative to the wheelchair’s forward direction
-        Left Edge – the left side of the table relative to the wheelchair’s forward direction
-
-        In the second situation, the table is not perpendicular to you, but you still look towards the center of it.
-        There are four possible edge positions around the table named based on the closest corner to you. The corner is shared by the near edges.
-
-        Right Near edge - Edge at the right side of the near corner  
-        Left Near Edge – Edge at the left side of the near corner
-
-        The furthest corner is localated in the opposite side of the nearest one. This corner is shared by the far edges
-        Left Far Edge – Edge at the left side of the far corner
-        Right Far Edge – Edge at the right side of the far corner
-
-        When the user makes a request, infere which situation is happening and determine the most suitable position only if you can identify it with complete certainty.
-        If there is any risk of choosing the wrong position, you must respond with “I don't know.”
-
-        Your response must follow these rules:
-
-        Your output must include exactly one of the following options if you think your arein the first situation:
-        “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”,
-         
-        Your output must include exactly one of the following options if you think your arein the second situation:
-        “Right Near edge”, “Right Far Edge”, “Left Far Edge”, “Left Near Edge”,
-
-        Never output more than one of these labels in a single response.
-        If you are not completely certain, respond only with “I don't know.”
-        If you can determine the correct position, respond politely in one or two sentences and include the chosen label.
-
-        User request:
-        """
-
-        base_prompt2=f"""
-        "You are an assistant AI mounted on a wheelchair, positioned near a rectangular table. Your goal is to accurately identify the requested table edge based on the user's instructions.
-
-        Here's a reminder of the edge names:
-
-        Situation 1: Facing a Table Edge Directly
-
-        * Close Edge: The edge you are currently facing.
-        * Far Edge: The edge directly opposite the Close Edge.
-        * Right Edge: The right side of the table, relative to your forward direction.
-        * Left Edge: The left side of the table, relative to your forward direction.
-
-        Situation 2: Table Not Perpendicular - Viewing Towards Center
-
-        * Right Near edge: The right side of the near corner closest to you.
-        * Right Far Edge: The right side of the far corner, opposite the near corner.
-        * Left Far Edge: The left side of the far corner, opposite the near corner.
-        * Left Near Edge: The left side of the near corner closest to you.
-
-        Important Considerations:
-
-        * The "back side" of the table refers to the edge directly opposite the edge you are facing.
-        * When the table is not perpendicular, the "Near/Close/Front" and "Far/Back/Opposite" designations refer to the two corners closest and farthest from your current position, respectively.
-        * If you are unsure about the user's request, respond with "I don't know."
-        * Your output must include exactly one of the edges labels: “Right Near edge”, “Right Far Edge”, “Left Far Edge”, “Left Near Edge” , “Close Edge”, “Far Edge”, “Right Edge”, “Left Edge”
-
-        User Request:
-        "{text}"
-
-        Answer:
-        """
-        prompt = base_prompt2 + text
-        print(prompt)
-        data = {
-                "model": "google/gemma-3n-e4b-it:free",
-                "messages": [{"role": "user", "content": prompt}]
-                }
-        response = requests.post(API_URL, json=data, headers=headers)
-   
-
-        #response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
-
-        result = response.json()
-
-        print (result)
-        
-        try:
-           output = result["choices"][0]["message"]["content"]
-        except KeyError:
-           self.get_logger().error(f"KeyError in result, full content: {result}")
-           
-           raise
-       
-        return output
+ 
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -463,7 +197,7 @@ class TaskManager(Node):
                     return
 
         if self.out_edge is None or self.out_edge_pose == None:
-            self.get_logger().info("(No matching edge found in LLM output)")
+            self.get_logger().warn(f"""No matching edge found in LLM output: "{LLM_out}" """)
         else:
             self.get_logger().info(f"(Matching Edge: {self.out_edge}: {self.out_edge_pose})")
 

@@ -244,7 +244,7 @@ class Assessment(Node):
     def save_data(self, goal_edge, command, LLM_edge , LLM_out, TF):
         wb = load_workbook(self.filename)
         ws = wb.active
-        ws.append([ goal_edge[1], command, LLM_edge, LLM_out, TF])
+        ws.append([ goal_edge, command, LLM_edge, LLM_out, TF])
         wb.save(self.filename)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
