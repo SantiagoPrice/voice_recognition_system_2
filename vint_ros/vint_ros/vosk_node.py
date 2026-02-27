@@ -15,7 +15,7 @@ import numpy as np
 import math
 import rclpy
 from rclpy.node import Node
-from vosk import Model, KaldiRecognizer , GpuInit
+from vosk import Model, GpuInit
 from std_msgs.msg import String
 from ament_index_python.packages import get_package_share_directory
 import yaml
@@ -57,7 +57,7 @@ class VoiceRecognition(Node):
     def run(self):
         samplerate = int(sd.query_devices(None, "input")["default_samplerate"])
         print(f"actual sample rate is {samplerate}")
-        with sd.RawInputStream(samplerate=samplerate, blocksize=int(samplerate*1), dtype="int16",
+        with sd.RawInputStream(samplerate=samplerate, blocksize=int(samplerate*0.02), dtype="int16",
                                channels=1, callback=audio_callback, device=DEV__N):
             rec = vosk.KaldiRecognizer(model, samplerate)
             print("Listening...")
@@ -67,12 +67,13 @@ class VoiceRecognition(Node):
                 if self.stop == True:
                     continue
                 data = q.get()
-                audio_np = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
-                volume =  max(np.abs(audio_np))
+                audio_np = np.frombuffer(data, dtype=np.int16)
+                volume =  np.max(np.abs(audio_np))/ 32768.0
            
                 # threshold_of_volume
-                if volume < 0.1:
-                        print("Listening...")
+                if volume < 0.2:
+                        # print("Listening...")
+                        pass
                 else:
                     self.read=True
                     print(f"Volume: {volume:.4f}")
@@ -88,6 +89,7 @@ class VoiceRecognition(Node):
                     self.read=False
                     result = json.loads(rec.Result())
                     text = result.get("text", "").strip().lower()
+                    rec.FinalResult()
                     #text = input("test sentence: ")
                     #print(f"audio recording: {text}")
                     if text:
@@ -95,6 +97,7 @@ class VoiceRecognition(Node):
                         command = String()
                         command.data = text
                         self.pub_text.publish(command)
+                    
     
 def main():
     rclpy.init()
