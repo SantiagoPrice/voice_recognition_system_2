@@ -29,6 +29,7 @@ from std_msgs.msg import String
 from std_msgs.msg import Int32
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
+import ast
 
 #----------------------------------------------------
 class Assessment(Node):
@@ -45,10 +46,11 @@ class Assessment(Node):
         self.out_edge_num = None
         self.prediction_requested = False
         self.state = {"table": {"pos": None, "quat": None, "size": None},}
+        self.target_edge= None
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.filename = f"prompt_test_{timestamp}.xlsx"
-        header = ["Scenario", "Answer Label", "Request", "LLM Output", "Judged Label", "True/False"]
+        header = ["Target Label", "Voice Command" , "LLM Selection", "LLM response", "Correct predictions?"]
         wb = Workbook()
         ws = wb.active
         ws.append(header)
@@ -59,7 +61,8 @@ class Assessment(Node):
         self.arrow_marker = self.create_timer(1.0, self.publish_arrow_marker)    
         self.LLM_out_line_pub = self.create_publisher(Marker, '/LLM_out_line', 10)
         self.LLM_marker = self.create_timer(0.1, self.publish_LLM_out_marker)    
-        self.map_update_pub = self.create_publisher(Float32MultiArray, '/map_update', 10)     
+        self.map_update_pub = self.create_publisher(Float32MultiArray, '/map_update', 10) 
+
         # ---- subscribe ----
         self.sub_table = self.create_subscription(Marker,
                 "/table_marker",
@@ -131,13 +134,28 @@ class Assessment(Node):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def LLM_out_cb(self, msg: String):
-        self.LLM_out = msg.data.strip()
+        lab_reps = msg.data.split(" / ")
+        self.LLM_lab = lab_reps[0]
+        self.LLM_out = lab_reps[1]
         self.get_logger().info("LLM out received")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def edge_cb(self, msg: String):
-        self.edge_list = msg.data.strip()
-        #self.get_logger().info("edge list received")
+        edge_text = msg.data.strip()
+
+        edges_nm_ps = [s.strip() for s in edge_text.splitlines() if s.strip()]
+        
+        self.edge_list = {}
+
+        if len(edges_nm_ps) != 4:
+            self.get_logger().warn(f"Unexpected /edge_list format: {edges_nm_ps}")
+            return
+        
+        for edge_nm_ps in edges_nm_ps:
+            edge_name = edge_nm_ps.split("//")[0]
+            edge_ps = (ast.literal_eval(edge_nm_ps.split("//")[-1]))
+            self.edge_list.update({edge_name : edge_ps})
+
 
 #======================================================================
 
@@ -157,24 +175,27 @@ class Assessment(Node):
 
         self.get_logger().info("")
         self.get_logger().info("--------------- Result ----------------")
-        # case判別
-        case = self.case_judge(self.edge_list)
-        self.get_logger().info(f"case: {case}")
+
         # command出力
-        self.get_logger().info(f"Command: {self.command}")
-        # LLM出力テキスト →　判別エッジラベル
-        LLM_edge = self.result_edge(self.LLM_out, self.edge_list)
-        self.get_logger().info(f"LLM Edge: {LLM_edge}")
+
         # 設定ゴール番号 → ゴールエッジラベル
-        goal_edge = self.goal_edge_detect(self.goal_num, self.edge_list)
-        self.get_logger().info(f"Goal Edge: {goal_edge}")
-        # ゴールとLLMの結果の比較結果
-        #self.get_logger().info(f"LLM_num: {self.out_edge_num}")
-        #self.get_logger().info(f"goal_num: {self.goal_num}")
-        T_or_F = self.out_goal_comp(self.goal_num, self.out_edge_num)
+        self.get_logger().info(f"Goal Edge: {self.target_edge}")
+
+        self.get_logger().info(f"Voice Command: {self.command}")
+
+
+        self.get_logger().info(f"LLM selection: {self.LLM_lab}")
+
+
+        self.get_logger().info(f"LLM response: {self.LLM_out}")
+
+
+        T_or_F = self.out_goal_comp(self.LLM_lab in self.target_edge)
+
         self.get_logger().info(f"Result: {T_or_F}")
+        
         # 結果の保存
-        self.save_data(case, self.command, self.LLM_out, LLM_edge, goal_edge, T_or_F)
+        self.save_data(self.target_edge , self.command, self.LLM_lab, self.LLM_out, T_or_F)
         self.get_logger().info("(Save result)")
         self.get_logger().info("---------------------------------------")
         # LLM_lineの表示
@@ -212,114 +233,13 @@ class Assessment(Node):
         self.prediction_requested = False
         self.LLM_out = None
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def case_judge(self, edge_list):
-        if edge_list is None:
-            return None
-
-        edges_split = self.edge_list_split(edge_list)
-        
-        if any("Near right edge" in e for e in edges_split):
-            return "case2"
-        elif any("Near edge" in e for e in edges_split):
-            return "case1"
-        return None
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def goal_edge_detect(self, goal_num, edge_list):
-        edges_split = self.edge_list_split(self.edge_list)
-        for n in range(4):
-            if goal_num == (n+1):
-                goal_edge = edges_split[n]
-                break
-        return goal_edge
-                
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def edge_list_split(self, edge_list):
-        edges = []
-
-        for line in edge_list.splitlines():
-            if not line.strip():
-                continue
-
-            # ":" の右側を取得
-            right_part = line.split(":", 1)[1]
-
-            # "/" で分割
-            parts = [p.strip() for p in right_part.split("/")]
-
-            # 最後は座標なので除外
-            labels = parts[:-1]
-
-            edges.append(labels)
-
-        return edges
-
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def out_goal_comp(self, goal_num, out_num):
-        if goal_num == out_num:
-            return True
-        else:
-            return False
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def result_edge(self, LLM_out, edge_list):
-
-        self.out_edge = None
-        self.out_edge_num = None
-        matched_index = None
-        matched_label = None
-
-        edges_split = self.edge_list_split(edge_list)
-        lines = edge_list.splitlines()
-
-        LLM_lower = LLM_out.casefold()
-
-        # --- 全ラベルをフラット化 ---
-        all_labels = []
-
-        for idx, labels in enumerate(edges_split):
-            for label in labels:
-                all_labels.append((idx, label))
-
-        # --- ラベル長で降順ソート（最長一致優先） ---
-        all_labels.sort(key=lambda x: len(x[1]), reverse=True)
-
-        # --- 全体から最長一致を探す ---
-        for idx, label in all_labels:
-            pattern = rf"\b{re.escape(label.casefold())}\b"
-            if re.search(pattern, LLM_lower):
-                matched_index = idx
-                matched_label = label
-                break
-
-        if matched_index is None:
-            self.get_logger().info("(No matching edge found in LLM output)")
-            return
-
-        # マッチ情報保存
-        self.out_edge = matched_label
-        self.out_edge_num = matched_index + 1
-
-        # 座標抽出
-        match = re.search(r"\(([-\d.]+),\s*([-\d.]+)\)", lines[matched_index])
-        if match:
-            self.edge_x = float(match.group(1))
-            self.edge_y = float(match.group(2))
-        else:
-            self.get_logger().info("(Coordinate parse failed)")
-            return
-
-        return self.out_edge
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def save_data(self, case, command, LLM_out, LLM_edge, goal_edge, TF):
+
+    def save_data(self, goal_edge, command, LLM_edge , LLM_out, TF):
         wb = load_workbook(self.filename)
         ws = wb.active
-        ws.append([case, command, LLM_out, LLM_edge, goal_edge[0], goal_edge[1], TF])
+        ws.append([ goal_edge[1], command, LLM_edge, LLM_out, TF])
         wb.save(self.filename)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -329,10 +249,6 @@ class Assessment(Node):
         if self.state["table"]["pos"] is None:
             return
 
-        table_x, table_y, table_z = self.state["table"]["pos"]
-        table_size_x, table_size_y, table_size_z = self.state["table"]["size"]
-        table_qx, table_qy, table_qz, table_qw = self.state["table"]["quat"]
-
         arrow = Marker()
         arrow.header.frame_id = "map"
         arrow.header.stamp = now
@@ -341,42 +257,27 @@ class Assessment(Node):
         arrow.type = Marker.ARROW
         arrow.action = Marker.ADD
 
-        start = Point()
-        end = Point()
 
-        offset_end = 0.2
-        offset_start = offset_end + 0.7
+        self.target_edge = list(self.edge_list.keys())[self.goal_num]
+        posex , posey ,yaw = self.edge_list[self.target_edge]
 
-        if self.goal_num == 1:
-            end.x = table_x + (table_size_x / 2) + offset_end
-            end.y = table_y
-            end.z = table_z
-            start.x = table_x + (table_size_x / 2) + offset_start
-            start.y = table_y
-            start.z = table_z
-        if self.goal_num == 3:
-            end.x = table_x - (table_size_x / 2) - offset_end
-            end.y = table_y
-            end.z = table_z
-            start.x = table_x - (table_size_x / 2) - offset_start
-            start.y = table_y
-            start.z = table_z
-        if self.goal_num == 2:
-            end.x = table_x
-            end.y = table_y + (table_size_y / 2) + offset_end
-            end.z = table_z
-            start.x = table_x
-            start.y = table_y + (table_size_y / 2) + offset_start
-            start.z = table_z
-        if self.goal_num == 4:
-            end.x = table_x
-            end.y = table_y - (table_size_y / 2) - offset_end
-            end.z = table_z
-            start.x = table_x
-            start.y = table_y - (table_size_y / 2) - offset_start
-            start.z = table_z
+        # ✅ position from poses[name]
+        arrow.pose.position.x = posex
+        arrow.pose.position.y = posey
+        arrow.pose.position.z = 0.0
 
-        arrow.points = [start, end]
+        # ✅ orientation from yaw
+        
+        q=self.yaw_to_quaternion(yaw)
+        arrow.pose.orientation.x = q[0]
+        arrow.pose.orientation.y = q[1] 
+        arrow.pose.orientation.z = q[2] 
+        arrow.pose.orientation.w = q[3] 
+
+        # Arrow size
+        arrow.scale.x = 0.6   # length
+        arrow.scale.y = 0.1   # width
+        arrow.scale.z = 0.1   # height
 
         # 矢印の太さ
         arrow.scale.x = 0.075  # シャフト径
@@ -391,54 +292,14 @@ class Assessment(Node):
         # ------------------#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def publish_LLM_out_marker(self):
-
-        if self.state["table"]["pos"] is None:
-            return
-
-        now = self.get_clock().now().to_msg()
-
-        table_x, table_y, table_z = self.state["table"]["pos"]
-        table_size_x, table_size_y, table_size_z = self.state["table"]["size"]
-
-        line = Marker()
-        line.header.frame_id = "map"
-        line.header.stamp = now
-        line.ns = "LLM_outline"
-        line.id = 2
-        line.type = Marker.LINE_LIST
-        line.action = Marker.ADD
-
-        line.scale.x = 0.5
-
-        line.color.r = 0.0
-        line.color.g = 0.0
-        line.color.b = 1.0
-        line.color.a = self.vis
-
-        start = Point()
-        end = Point()
-        if self.edge_x == 0.0:
-            start.x = self.edge_x + (table_size_x/2)
-            start.y = self.edge_y
-            start.z = table_z + (table_size_z/2)
-            end.x = self.edge_x - (table_size_x/2)
-            end.y = self.edge_y
-            end.z = table_z + (table_size_z/2)
-        if self.edge_y == 0.0:
-            start.x = self.edge_x
-            start.y = self.edge_y + (table_size_y/2)
-            start.z = table_z + (table_size_z/2)
-            end.x = self.edge_x
-            end.y = self.edge_y - (table_size_y/2)
-            end.z = table_z + (table_size_z/2)
-
-        #line.points = [start, end]
-        line.points.append(start)
-        line.points.append(end)
-        line.lifetime = Duration(sec=0, nanosec=0)
-
-        self.LLM_out_line_pub.publish(line)
+    def yaw_to_quaternion(eslf, yaw: float) -> list:
+        """Convert yaw angle (rad) to quaternion."""
+        qx = 0.0
+        qy = 0.0
+        qz = math.sin(yaw / 2.0)
+        qw = math.cos(yaw / 2.0)
+        q=[qx,qy,qz,qw]
+        return q
 
 
 

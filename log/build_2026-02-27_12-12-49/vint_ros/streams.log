@@ -1,0 +1,23 @@
+[0.006s] Invoking command in '/home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/build/vint_ros': CMAKE_PREFIX_PATH=/opt/ros/humble CONDA_PROMPT_MODIFIER=(vInt_host) /usr/bin/cmake /home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/vint_ros -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/install/vint_ros
+[0.017s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.078s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.094s] Traceback (most recent call last):
+[0.095s]   File "/opt/ros/humble/share/ament_cmake_core/cmake/core/package_xml_2_cmake.py", line 22, in <module>
+[0.095s]     from catkin_pkg.package import parse_package_string
+[0.095s] ModuleNotFoundError: No module named 'catkin_pkg'
+[0.097s] [31mCMake Error at /opt/ros/humble/share/ament_cmake_core/cmake/core/ament_package_xml.cmake:95 (message):
+[0.097s]   execute_process(/home/sip-mobility/miniconda3/bin/python3
+[0.097s]   /opt/ros/humble/share/ament_cmake_core/cmake/core/package_xml_2_cmake.py
+[0.098s]   /home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/vint_ros/package.xml
+[0.098s]   /home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/build/vint_ros/ament_cmake_core/package.cmake)
+[0.098s]   returned error code 1
+[0.098s] Call Stack (most recent call first):
+[0.098s]   /opt/ros/humble/share/ament_cmake_core/cmake/core/ament_package_xml.cmake:49 (_ament_package_xml)
+[0.098s]   /opt/ros/humble/share/ament_cmake_python/cmake/ament_python_install_package.cmake:60 (ament_package_xml)
+[0.098s]   /opt/ros/humble/share/ament_cmake_python/cmake/ament_python_install_package.cmake:39 (_ament_cmake_python_install_package)
+[0.098s]   CMakeLists.txt:10 (ament_python_install_package)
+[0.098s] 
+[0.098s] [0m
+[0.098s] -- Configuring incomplete, errors occurred!
+[0.098s] See also "/home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/build/vint_ros/CMakeFiles/CMakeOutput.log".
+[0.099s] Invoked command in '/home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/build/vint_ros' returned '1': CMAKE_PREFIX_PATH=/opt/ros/humble CONDA_PROMPT_MODIFIER=(vInt_host) /usr/bin/cmake /home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/vint_ros -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/install/vint_ros

@@ -182,6 +182,7 @@ class TaskManager(Node):
 
 
 
+
         
 
         self.get_logger().info(f"LLM output: {out_LLM}")
@@ -193,7 +194,7 @@ class TaskManager(Node):
 
         trigger = Empty()
         out_LLM_msg = String()
-        out_LLM_msg.data = out_LLM
+        out_LLM_msg.data = self.out_edge + " // " + out_LLM
         
 
         self.LLM_out.publish(out_LLM_msg)
@@ -450,9 +451,9 @@ class TaskManager(Node):
         LLM_lower = LLM_out.casefold()
 
         for labels in self.edges.keys():
-            parts = [p.strip().casefold() for p in labels.split(" / ")]
+            parts = [p.strip() for p in labels.split(" / ")]
             for part in parts:
-                pattern = rf"\b{re.escape(part)}\b"
+                pattern = rf"\b{re.escape(part.casefold())}\b"
                 if re.search(pattern, LLM_lower):
                     self.out_edge = part
                     self.out_edge_pose = self.edges[labels]
@@ -498,8 +499,8 @@ class TaskManager(Node):
         marker.scale.z = 0.1   # height
 
         # Color (RGBA)
-        marker.color.r = 1.0
-        marker.color.g = 0.0
+        marker.color.r = 0.0
+        marker.color.g = 1.0
         marker.color.b = 0.0
         marker.color.a = 0.5
 
