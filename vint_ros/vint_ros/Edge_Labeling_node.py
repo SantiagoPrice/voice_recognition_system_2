@@ -190,7 +190,7 @@ class EdgeLabeling(Node):
             edge_l= np.linalg.norm(edge)
             edge_n = np.array([edge[1],-edge[0]])/ edge_l
 
-            pose_loc = gc - edge * 0.5 + 0.5*edge_n
+            pose_loc = gc - edge * 0.5 + 0.8*edge_n
 
             pose_loc_c = pose_loc - np.array([table_x, table_y])
 
