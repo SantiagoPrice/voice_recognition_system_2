@@ -16,6 +16,10 @@ Google Gemini is one option to create audio: https://aistudio.google.com/generat
 
 Compilation:
 
-Activate python environment
+colcon build --symlink-install --packages-select vint_ros
 
-colcon build --symlink-install --packages-select vint_ros --cmake-args -DPYTHON_EXECUTABLE=$(which python) -DVOSK_DIR=../../src/VOSK_PATH
+Adding new nodes:
+
+Create node in ${PROJECT_PATH}/vint_ros/vint_ros
+Make it executable chmod +x node/path
+Add node path in CMakeList.txt

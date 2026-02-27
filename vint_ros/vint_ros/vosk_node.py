@@ -16,15 +16,23 @@ from rclpy.node import Node
 from vosk import Model, KaldiRecognizer , GpuInit
 from std_msgs.msg import String
 from ament_index_python.packages import get_package_share_directory
+import yaml
+
+
+
+pkg_path = get_package_share_directory('vint_ros')
+PAR_PATH = os.path.join(pkg_path,'conf/conf.yaml')
+
+
+with open(PAR_PATH, "r") as f:
+    conf_handlr= yaml.safe_load(f)
+    MODEL_PATH = conf_handlr["vosk_model"]
+    DEV__N = conf_handlr["audio_dev"]
 
 
 
 GpuInit()
 
-pkg_path = get_package_share_directory('vint_ros')
-
-
-MODEL_PATH = os.path.join(pkg_path,"vosk-model-en-us-0.42-gigaspeech")
 model = Model(MODEL_PATH)
 
 q = queue.Queue()
@@ -48,7 +56,7 @@ class VoiceRecognition(Node):
         samplerate = int(sd.query_devices(None, "input")["default_samplerate"])
         print(f"actual sample rate is {samplerate}")
         with sd.RawInputStream(samplerate=samplerate, blocksize=int(samplerate*1), dtype="int16",
-                               channels=1, callback=audio_callback, device=0):
+                               channels=1, callback=audio_callback, device=DEV__N):
             rec = vosk.KaldiRecognizer(model, samplerate)
             print("Listening...")
             self.read=False

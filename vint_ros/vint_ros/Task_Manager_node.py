@@ -11,7 +11,7 @@ import rclpy
 import requests
 import time
 import numpy as np
-import pyttsx3
+# import pyttsx3
 from google import genai
 import math
 import random
@@ -37,11 +37,13 @@ from ament_index_python.packages import get_package_share_directory
 
 
 pkg_path = get_package_share_directory('vint_ros')
-API_PATH = os.path.join(pkg_path,'conf/API_key.yaml')
+API_PATH = os.path.join(pkg_path,'conf/conf.yaml')
 
 
 with open(API_PATH, "r") as f:
+    conf_handlr= yaml.safe_load(f)
     API_KEY = ' '
+    API_KEY_OR = conf_handlr["key_or"]
 
 
 
@@ -49,12 +51,12 @@ API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 client = genai.Client(api_key=API_KEY)
 
-engine = pyttsx3.init()
-engine.setProperty("rate", 150)
-engine.setProperty("volume", 1.0)
+# engine = pyttsx3.init()
+# engine.setProperty("rate", 150)
+# engine.setProperty("volume", 1.0)
 
 headers = {
-        "Authorization": f"Bearer {API_KEY}",
+        "Authorization": f"Bearer {API_KEY_OR}",
         "Content-Type": "application/json"
         }
 
@@ -166,12 +168,15 @@ class TaskManager(Node):
             self.case = "case1"
             out_LLM = "OK, I will take you Right                                                                                                                                                                                                                                     edge"
             #out_LLM = self.LLM_edge_case1(command_text)
-            out_LLM = self.LLM_edge_case_both(command_text)
+            # out_LLM = self.LLM_edge_case_both(command_text)
+
         elif any("Near right edge" in e for e in e_names):
             self.case = "case2"
             out_LLM = "OK, I will take you Far Right edge"
             #out_LLM = self.LLM_edge_case2(command_text)
-            out_LLM = self.LLM_edge_case_both(command_text)
+            # out_LLM = self.LLM_edge_case_both(command_text)
+
+        out_LLM="Near Edge"
 
         self.result_edge(out_LLM)
 
@@ -226,7 +231,7 @@ class TaskManager(Node):
                 "model": "google/gemma-3n-e4b-it:free",
                 "messages": [{"role": "user", "content": prompt}]
                 }
-        #response = requests.post(API_URL, json=data, headers=headers)
+        response = requests.post(API_URL, json=data, headers=headers)
    
 
         response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
@@ -383,7 +388,7 @@ class TaskManager(Node):
         User request:
         """
 
-        base_prompt2="""
+        base_prompt2=f"""
         "You are an assistant AI mounted on a wheelchair, positioned near a rectangular table. Your goal is to accurately identify the requested table edge based on the user's instructions.
 
         Here's a reminder of the edge names:
@@ -409,7 +414,10 @@ class TaskManager(Node):
         * If you are unsure about the user's request, respond with "I don't know."
         * Your output must include exactly one of the edges labels: “Near Edge”, “Far Edge”, “Right Edge”, “Left Edge”, “Near Right Edge”, “Far Right Edge”, “Far Left Edge”, “Near Left Edge”
 
-        User Request:"
+        User Request:
+        "{text}"
+
+        Answer:
         """
         prompt = base_prompt2 + text
         print(prompt)
@@ -417,10 +425,10 @@ class TaskManager(Node):
                 "model": "google/gemma-3n-e4b-it:free",
                 "messages": [{"role": "user", "content": prompt}]
                 }
-        #response = requests.post(API_URL, json=data, headers=headers)
+        response = requests.post(API_URL, json=data, headers=headers)
    
 
-        response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+        #response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
         
         output = response.text
         #try:

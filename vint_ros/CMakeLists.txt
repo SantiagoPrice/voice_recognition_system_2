@@ -5,8 +5,6 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 
 
-set(VOSK_DIR "" CACHE PATH "Path to model")
-
 
 # Install Python package
 ament_python_install_package(${PROJECT_NAME})
@@ -21,6 +19,7 @@ install(PROGRAMS
   vint_ros/Perception_node.py
   vint_ros/Edge_Labeling_node.py
   vint_ros/Task_Manager_node.py
+  vint_ros/Goal_to_Nav2_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -31,17 +30,12 @@ install(DIRECTORY conf
 )
 
 
-if(VOSK_DIR)
-  # Install launch files
-  install(DIRECTORY launch
-    DESTINATION share/${PROJECT_NAME}
-  )
+# Install launch files
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
-  # Install Vosk model directory
-  install(DIRECTORY ${VOSK_DIR}
-    DESTINATION share/${PROJECT_NAME}
-  )
-endif()
+
 
 
 
