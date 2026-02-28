@@ -125,7 +125,7 @@ class TaskManager(Node):
             return
 
         self.get_logger().info(f"received command {command_text}")
-        out_LLM = self.LLM(command_text,"pose_select_both")
+        out_LLM = self.LLM(command_text,"pose_select_both_examples_light")
         self.result_edge(out_LLM)
        
 
@@ -185,7 +185,7 @@ class TaskManager(Node):
         self.out_edge_pose = None
 
    
-        LLM_lower = LLM_out.casefold()
+        LLM_lower = LLM_out.split(".")[-1].casefold()  #Picking the last sentence of the LLM response
 
         for labels in self.edges.keys():
             parts = [p.strip() for p in labels.split(" / ")]
