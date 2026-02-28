@@ -57,9 +57,10 @@ class VoiceRecognition(Node):
     def run(self):
         samplerate = int(sd.query_devices(None, "input")["default_samplerate"])
         print(f"actual sample rate is {samplerate}")
-        with sd.RawInputStream(samplerate=samplerate, blocksize=int(samplerate*0.02), dtype="int16",
+        with sd.RawInputStream(samplerate=samplerate, blocksize=int(samplerate*0.01), dtype="int16",
                                channels=1, callback=audio_callback, device=DEV__N):
             rec = vosk.KaldiRecognizer(model, samplerate)
+            self.get_logger().info(f"Ready")
             print("Listening...")
             self.read=False
 
@@ -71,7 +72,7 @@ class VoiceRecognition(Node):
                 volume =  np.max(np.abs(audio_np))/ 32768.0
            
                 # threshold_of_volume
-                if volume < 0.2:
+                if volume < 0.15:
                         # print("Listening...")
                         pass
                 else:
