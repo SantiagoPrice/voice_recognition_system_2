@@ -214,32 +214,32 @@ class EdgeLabeling(Node):
         GAMMA = (sorted_theta[0] + (360.0 - sorted_theta[3])) / 2  
 
         if sorted_theta[0] < THETA_A:                       # Right Reference corner INSIDE the cone
-            labels = ["Near left edge / Close edge",
+            labels = ["Left Near edge / Close edge",
                       "Right Near edge / Right edge",
-                      "Right Far edge / Far edge",
+                      "Right Far edge / Distant edge",
                       "Left Far edge / Left edge"]
 
         elif sorted_theta[3] < (360.0 - THETA_A):           # NO corner INSIDE the cone, line connecting corner and center passes at the RIGHT of the wheelchair
             if sorted_theta[0] < GAMMA:                            # Simmetry axis of the near edge passes at the LEFT of the wheelchair 
                 labels = ["Close edge / Left Near edge",
                         "Right edge / Right Near edge",
-                        "Far edge / Right Far edge",
+                        "Distant edge / Right Far edge",
                         "Left edge / Left Far edge"]
             elif sorted_theta[0] > GAMMA:                          # Simmetry axis of the near edge passes at the LEFT of the wheelchair center
                 labels = ["Close edge / Right Near edge",
                         "Right edge / Right Far edge",
-                        "Far edge / Left Far edge",
+                        "Distant edge / Left Far edge",
                         "Left edge / Left Near edge"]
             else:                                                  # Simmetry axis of the near edge crosses the wheelchair center
                 labels = ["Close edge / Close edge",
                         "Right edge / Right edge",
-                        "Far edge / Far edge",
+                        "Distant edge / Distant edge",
                         "Left edge / Left edge"]
         else:
             labels = ["Right Near edge / Close edge",       # Left Reference corner INSIDE the cone
                       "Right Far edge / Right edge",
-                      "Left Far edge / Far edge",
-                      "Near left edge / Left edge"]
+                      "Left Far edge / Distant edge",
+                      "Left Near edge / Left edge"]
 
         semantic_map = {}
 
