@@ -185,7 +185,7 @@ class TaskManager(Node):
         self.out_edge_pose = None
 
    
-        LLM_lower = LLM_out.split(".")[-1].casefold()  #Picking the last sentence of the LLM response
+        LLM_lower = LLM_out.split(".")[-2].casefold()  #Picking the last sentence of the LLM response
 
         for labels in self.edges.keys():
             parts = [p.strip() for p in labels.split(" / ")]
@@ -197,7 +197,7 @@ class TaskManager(Node):
                     return
 
         if self.out_edge is None or self.out_edge_pose == None:
-            self.get_logger().warn(f"""No matching edge found in LLM output: "{LLM_out}" """)
+            self.get_logger().warn(f"""No matching edge found in LLM output: "{LLM_lower}" """)
         else:
             self.get_logger().info(f"(Matching Edge: {self.out_edge}: {self.out_edge_pose})")
 
