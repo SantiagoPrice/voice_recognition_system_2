@@ -1,0 +1,809 @@
+db_full:
+  Close Edge:
+  - Pull me up close to the table
+  - I'd like to be right up against the table
+  - Get me closer to the edge
+  - Bring me in toward the table
+  - I want to be within arm's reach
+  - Move me up to the table
+  - I'd like to close the gap between me and the table
+  - Scoot me forward a little
+  - I want to be right at the table
+  - Let me get closer to it
+  - Slide me in toward the front
+  - I want to be near enough to rest my arms
+  - Pull up to the table edge
+  - Move me right to the front of it
+  - I'd like to be tucked in close
+  - Bring me nearer to the surface
+  - I want the closest available spot
+  - The front side works better for me
+  - I'd like to be positioned just at the edge
+  - Get me to the near side please
+  - I want to be close enough to work comfortably
+  - Slide forward a bit for me
+  - I'd rather be up close than far away
+  - The side right in front feels better
+  - I want to be just within reach of the table
+  - Move me to where I can touch the edge easily
+  - The nearest position is what I need
+  - I'd like to roll in closer
+  - Being right up at the table helps me
+  - I want to approach the table from the front
+  - Closer is better for me right now
+  - Just a little forward from here
+  - I need to be near the edge to work
+  - The front of the table is where I want to be
+  - Bring me in tight to the near side
+  - I'd feel better positioned right up close
+  - Let me get to the front edge
+  - I want the side that's nearest to me
+  - Moving forward a bit would help
+  - I'd like the edge I can reach without stretching
+  - The close side is more practical for me
+  - I want to be right there at the front
+  - Ease me up toward the table
+  - That near spot is where I want to settle
+  - I'd like to be positioned at the front edge
+  - The closest edge suits me better
+  - I feel better when I'm right up at the table
+  - I want to roll in from the front
+  - Let me come up to the near side
+  - I'd like to tuck in close to the table
+  - I want to be at the edge I can lean into
+  - Bring me forward to the near side
+  - I'd like to sit right at the front of the table
+  - The position closest to me feels best
+  - Move me so I'm right there at the edge
+  - The near side gives me the best reach
+  - I'd like to position myself close in
+  - Just move me up a little
+  - I want to be where the table is right in front of me
+  - The front edge is where I want to be placed
+  - Get me to the closest side of the table
+  - Being up close makes it easier
+  - I'd like to approach from the near end
+  - Move me to where I can work right at the edge
+  - The near side feels most practical
+  - I want to settle in close to the table
+  - Bring me to the side that's directly in front
+  - I'd like to be positioned at the nearest edge
+  - Just roll me up to the table
+  - I want to work from up close
+  - The front of the table is where I'd like to be
+  - I'd like the spot right at the edge
+  - Being close feels more comfortable for working
+  - Move me to the near position
+  - I want the side of the table that's right here
+  - I'd like to be at the closest edge available
+  - Pull me up to where I can reach easily
+  - The near edge is what I'm after
+  - I want to be at the front side of the table
+  - Bring me to the edge that's closest to me now
+  - I'd like to slide in to the near side
+  - Being right at the front helps me focus
+  - I want to be positioned close to the surface
+  - Let me move up to the near edge
+  - I'd like to be at the front, close in
+  - Just a nudge forward would do it
+  - I want the nearest spot at the table
+  - Move me so the table is right in front of me
+  - I'd like to be tucked right up to the near edge
+  - I want to be right at the front of the table
+  - I'd like to move a bit closer to the table
+  - I want to move toward the near side
+  - I'd like to move forward from here
+  - I want the spot where I can reach easily
+  - The nearer position is easier for working
+  - I'd like to sit toward the front
+  - I'd like to bring my body closer to the table
+  - The near edge is easier for me to use
+  - I feel more comfortable around here
+  - This side feels more natural
+  Distant Edge:
+  - I'd like a bit more breathing room from the table
+  - Move me to the opposite side
+  - I want to sit across from where I am now
+  - Take me around to the other end
+  - I'd rather be farther back from the table
+  - I want some space between me and the table
+  - The far side feels more open
+  - Let me get to the other end of the table
+  - I'd like to move to the opposite edge
+  - A little more distance would be nice
+  - I want to sit across the table from here
+  - Move me around to the far end
+  - I'd prefer the edge that's further away
+  - Let me work from the opposite side
+  - I want to be on the other end of the table
+  - Move me to where the table is farther away
+  - I'd like to go around to the far side
+  - The distant edge gives more room
+  - I want the edge on the other side of the table
+  - I'd like to have more distance in front of me
+  - Take me to the far end please
+  - I want to work from across the table
+  - The opposite side feels more open to me
+  - I'd like some extra clearance from the table
+  - Move me back and around to the far side
+  - I want to sit where there's more space ahead
+  - Let me be on the far side of the table
+  - I'd feel better with a little more distance
+  - The other end of the table is where I want to be
+  - I want to approach the table from the far side
+  - I'd like to go to the end that's farther away
+  - Bring me around to the opposite end
+  - I want more distance between me and the table
+  - The far edge is what I'm looking for
+  - I'd like to move to the edge across from here
+  - Take me to the side that's farthest from my current spot
+  - I want to work from farther back
+  - I'd prefer the end that gives me more room
+  - Let me settle at the far side
+  - The opposite edge suits me better
+  - I'd like to position myself at the far end
+  - Move me to where I have more space in front
+  - I want the edge that's on the other side
+  - Going around to the far end feels right
+  - I'd like to be at the edge across the table
+  - The far side of the table is more comfortable for me
+  - I want to work from the distant end
+  - Let me go around to the other side
+  - I'd rather be at the end farther from here
+  - Move me to the opposite edge of the table
+  - I want to sit where the table stretches out ahead
+  - I'd like the far side where there's more room
+  - Take me around to the distant edge
+  - The far end of the table is where I'd like to sit
+  - I want more open space in front of me
+  - The other side of the table feels better
+  - I'd like to go to where the table is further away
+  - Let me work from the far side today
+  - I want to be at the edge that's across from me
+  - The distant side gives me more comfort
+  - I'd like to position myself farther back from the table
+  - Move me to the end of the table that's farther away
+  - I want to be at the opposite end
+  - I'd prefer to sit at a little distance from the table
+  - The far edge is the better spot for me
+  - Let me get to the other end of the table
+  - I want to work from the far side of it
+  - I'd like to be at the distant edge
+  - The far position gives me the space I need
+  - Bring me around to the far end
+  - I want to sit across the table
+  - I'd like the edge that's furthest from where I am
+  - Move me to the other side of the table
+  - I want to be at the far end of the table
+  - Going to the far side works better for me
+  - I'd like to position myself at the opposite edge
+  - The distant edge feels better today
+  - Let me move to the far side
+  - I want the spot on the other end of the table
+  - I'd like to go to the far edge
+  - Being farther from the table suits me better
+  - Move me to where I have more distance from the edge
+  - I want to sit at the far side of the table
+  - I'd prefer the edge that's on the opposite end
+  - Let me settle at the distant edge
+  - Take me to the far side please
+  - I'd like to work from the other end of the table
+  - I want more room on my side of the table
+  - I want more room on the far side of the table
+  - The opposite end of the table is where I belong
+  - I want to be a bit farther from the table
+  - I'd like to sit toward the far side
+  - I'd like to maintain some distance
+  - I'd like to move around to the far side
+  - I'd like to move back a little
+  - The far position feels calmer
+  - I'd like the side that gives me a wide view
+  - I want to work from the far side
+  - Being a little away feels easier
+  - The far area feels more spacious
+  Right Edge:
+  - I want to go to the right side of the table
+  - Move me over to the right
+  - I'd like the right edge please
+  - Let me get to the right side
+  - I want to be on the right of the table
+  - Shift me to the right
+  - The right side of the table suits me
+  - I'd like to move right along the table
+  - Take me to the right edge
+  - I want to work from the right side
+  - Move me along to the right edge
+  - I'd prefer the right side of the table
+  - I want to be positioned on the right
+  - Let me go to the right side
+  - Bring me to the right edge of the table
+  - The right side works well for me
+  - I'd like to be on the right end of the table
+  - Move me to the right side
+  - I want the right edge of the table
+  - I'd like to shift over to the right side
+  - Take me to where I'm facing right
+  - The right side of the table is what I need
+  - I want to work from the right
+  - I'd like to position myself on the right side
+  - Let me settle on the right edge
+  - Move me toward the right side of the table
+  - I want the edge on my right
+  - I'd feel better on the right side
+  - Bring me around to the right edge
+  - I want to be at the right side of the table
+  - The right edge is where I want to be
+  - Let me get to the right side of the table
+  - I'd like to go to the right edge
+  - Move me to the right of the table
+  - I want to sit on the right side
+  - I'd prefer the right edge of the table
+  - Take me over to the right side
+  - I want to position myself on the right
+  - Let me be on the right of the table
+  - I'd like to work from the right side
+  - The right side feels most natural to me
+  - Move me to the right end of the table
+  - I want to approach from the right side
+  - I'd like to be placed on the right edge
+  - Bring me to the right of the table
+  - I want to settle on the right side
+  - Let me get to the right edge please
+  - The right side of the table is better for me
+  - I'd like to be on the right side of it
+  - Move me to the right side of the table
+  - I want to be at the right edge
+  - Taking the right side feels comfortable
+  - I'd like the edge on the right
+  - Let me work from the right side
+  - I want to be positioned to the right
+  - The right edge works for me
+  - I'd like to go around to the right side
+  - Move me to the right side please
+  - I want to take the right side of the table
+  - I'd like to settle on the right edge
+  - Let me move over to the right
+  - I want the right side of the table today
+  - I'd prefer to be on the right edge
+  - The right end of the table is where I want to be
+  - Move me to the right side of the table
+  - I want to be at the right side
+  - I'd like to take the right edge
+  - Let me go to the right of the table
+  - I want to work from the right edge
+  - The right side is where I want to sit
+  - I'd like to position myself on the right end
+  - Bring me to the right side of the table
+  - I want to roll over to the right side
+  - I'd like the right end of the table
+  - Let me be at the right edge
+  - I want to sit on the right side of the table
+  - Moving to the right side would help
+  - I'd like to take the right side
+  - The right edge is my preferred spot
+  - Take me to the right side please
+  - I want to go to the right end
+  - I'd like to sit at the right edge of the table
+  - Let me approach from the right
+  - I want to be on the right end of the table
+  - I'd like to move to the right side
+  - Bring me over to the right edge
+  - The right side of the table is what I want
+  - I want the right side please
+  - I'd like to be at the right end
+  - I want to take my place on the right side
+  - I want to move to the right side
+  - I'd like to move around to the right
+  - I want to go to the right edge
+  - I'd like the side where I can use my right hand easily
+  - I'd like to shift slightly to the right from here
+  - I want to sit facing to the right
+  - The right side surface is easier to work with
+  - My posture feels more stable when shifted right
+  - That direction feels natural
+  - The right direction feels right
+  Left Edge:
+  - I want to go to the left side of the table
+  - Move me over to the left
+  - I'd like the left edge please
+  - Let me get to the left side
+  - I want to be on the left of the table
+  - Shift me to the left
+  - The left side of the table suits me
+  - I'd like to move left along the table
+  - Take me to the left edge
+  - I want to work from the left side
+  - Move me along to the left edge
+  - I'd prefer the left side of the table
+  - I want to be positioned on the left
+  - Let me go to the left side
+  - Bring me to the left edge of the table
+  - The left side works well for me
+  - I'd like to be on the left end of the table
+  - Move me to the left side
+  - I want the left edge of the table
+  - I'd like to shift over to the left side
+  - Take me to where I'm facing left
+  - The left side of the table is what I need
+  - I want to work from the left
+  - I'd like to position myself on the left side
+  - Let me settle on the left edge
+  - Move me toward the left side of the table
+  - I want the edge on my left
+  - I'd feel better on the left side
+  - Bring me around to the left edge
+  - I want to be at the left side of the table
+  - The left edge is where I want to be
+  - Let me get to the left side of the table
+  - I'd like to go to the left edge
+  - Move me to the left of the table
+  - I want to sit on the left side
+  - I'd prefer the left edge of the table
+  - Take me over to the left side
+  - I want to position myself on the left
+  - Let me be on the left of the table
+  - I'd like to work from the left side
+  - The left side feels most natural to me
+  - Move me to the left end of the table
+  - I want to approach from the left side
+  - I'd like to be placed on the left edge
+  - Bring me to the left of the table
+  - I want to settle on the left side
+  - Let me get to the left edge please
+  - The left side of the table is better for me
+  - I'd like to be on the left side of it
+  - Move me to the left side of the table
+  - I want to be at the left edge
+  - Taking the left side feels comfortable
+  - I'd like the edge on the left
+  - Let me work from the left side
+  - I want to be positioned to the left
+  - The left edge works for me
+  - I'd like to go around to the left side
+  - Move me to the left side please
+  - I want to take the left side of the table
+  - I'd like to settle on the left edge
+  - Let me move over to the left
+  - I want the left side of the table today
+  - I'd prefer to be on the left edge
+  - The left end of the table is where I want to be
+  - Move me to the left side of the table
+  - I want to be at the left side
+  - I'd like to take the left edge
+  - Let me go to the left of the table
+  - I want to work from the left edge
+  - The left side is where I want to sit
+  - I'd like to position myself on the left end
+  - Bring me to the left side of the table
+  - I want to roll over to the left side
+  - I'd like the left end of the table
+  - Let me be at the left edge
+  - I want to sit on the left side of the table
+  - Moving to the left side would help
+  - I'd like to take the left side
+  - The left edge is my preferred spot
+  - Take me to the left side please
+  - I want to go to the left end
+  - I'd like to sit at the left edge of the table
+  - Let me approach from the left
+  - I want to be on the left end of the table
+  - I'd like to move to the left side
+  - Bring me over to the left edge
+  - The left side of the table is what I want
+  - I want the left side please
+  - I'd like to be at the left end
+  - I want to take my place on the left side
+  - I want to move to the left side
+  - I'd like to move around to the left
+  - I want to go to the left edge
+  - I'd like the side where I can use my left hand easily
+  - I'd like to shift a little to the left from here
+  - I want to sit facing to the left
+  - The left side surface is easier to work with
+  - My posture feels natural on the left side
+  - The left direction feels calming
+  - This orientation feels right
+  Right Near Edge:
+  - I want to be close on the right side
+  - Move me to the near right corner
+  - I'd like the right side but up close
+  - Let me get to the near right
+  - I want to be at the right side near me
+  - Bring me to the right side close in
+  - I'd like to sit at the near right corner
+  - Move me up close on the right
+  - I want the right side that's nearest to me
+  - Let me settle at the near right
+  - I'd like to be at the right side of the closer end
+  - The near right corner is where I want to be
+  - Move me to the right and close in
+  - I want to approach the right side from the near end
+  - I'd like the close right spot
+  - Bring me to the near side on the right
+  - I want to be right up close on the right side
+  - The near right area is what I need
+  - I'd like to roll up on the right side
+  - Let me be close on the right edge
+  - I want to work from the near right
+  - Move me to the near right position
+  - I'd feel better at the near right corner
+  - Take me to the right side close to me
+  - I want the near corner on the right
+  - I'd like to tuck in close on the right
+  - Let me get to the near right side
+  - Move me up to the right side near end
+  - I want to be at the near right edge
+  - I'd like the spot that's close and on the right
+  - Bring me to the near end on the right side
+  - I want the close right corner of the table
+  - I'd like to sit close in on the right
+  - Let me settle near the right side
+  - The right side up close suits me
+  - I want to position myself at the near right
+  - I'd like to approach from the near right side
+  - Move me to the close right spot
+  - I want the right edge nearest to me
+  - I'd like to be at the near right area
+  - Bring me close on the right side
+  - I want to work from the near right corner
+  - Let me go to the near right edge
+  - I'd like the right side close by
+  - The near right edge is my spot
+  - I want to settle close on the right side
+  - I'd like to be near the right end of the table
+  - Move me right and close to the edge
+  - I want to be in the near right position
+  - I'd feel more comfortable close on the right
+  - Take me to the near right of the table
+  - I want the right side that's closest to me
+  - I'd like to tuck into the near right corner
+  - Let me be at the close right edge
+  - The right side near end is where I'd like to be
+  - I want to approach the near right corner
+  - I'd like to position myself close on the right side
+  - Bring me around to the near right
+  - I want to be at the right edge nearest to where I am
+  - I'd like to sit at the near right end
+  - Move me close on the right
+  - I want the near right side of the table
+  - I'd like to go to the closest right corner
+  - Let me settle at the near right end
+  - The close right spot works well for me
+  - I want to roll up close on the right side
+  - I'd like to get to the near right position
+  - Bring me to the right side near edge
+  - I want to work close on the right end
+  - I'd prefer the near right area
+  - Let me get close on the right side
+  - The near right corner is where I want to sit
+  - I want to be right there on the near right
+  - I'd like to move to the near right edge
+  - Move me up close to the right side
+  - I want the spot close in on the right
+  - I'd like to position myself at the near right end
+  - Let me get to the right side near end
+  - Being close on the right side works for me
+  - I want to approach from the close right side
+  - I'd like the near right spot at the table
+  - Take me to the near end on the right
+  - I want to be at the right edge close in
+  - I'd like to roll into the near right corner
+  - Bring me to the close right end
+  - The right side near to me is what I want
+  - I want the near right edge of the table
+  - I'd like to be positioned close on the right side
+  - Let me sit close on the right end
+  - I want to settle into the near right spot
+  - I want to move to the near right side
+  - I'd like the near right spot where I can rest my hand
+  - I want to sit closer on the right side
+  - I'd like to shift slightly to the right from here
+  - The near right edge is easier for me to reach
+  - The near right area is easier for working
+  - I want to come around to the near right side
+  - I'd like the spot where my right hand moves easily
+  - I can naturally face that side
+  - This general area feels comfortable
+  Right Far Edge:
+  - I want to be on the far right side
+  - Move me to the far right corner
+  - I'd like the right side but farther back
+  - Let me get to the far right
+  - I want the right side that's farther from me
+  - Bring me to the right side at the far end
+  - I'd like to sit at the far right corner
+  - Move me back and to the right
+  - I want the right side at the far end
+  - Let me settle at the far right
+  - I'd like to be at the right side of the farther end
+  - The far right corner is where I want to be
+  - Move me to the right and farther back
+  - I want to approach the right side from the far end
+  - I'd like the distant right spot
+  - Bring me to the far side on the right
+  - I want to be farther back on the right side
+  - The far right area is what I need
+  - I'd like to roll around to the far right
+  - Let me be at the far right edge
+  - I want to work from the far right
+  - Move me to the far right position
+  - I'd feel better at the far right corner
+  - Take me to the right side at the far end
+  - I want the far corner on the right
+  - I'd like to move back on the right side
+  - Let me get to the far right side
+  - Move me back to the right side far end
+  - I want to be at the far right edge
+  - I'd like the spot that's distant and on the right
+  - Bring me to the far end on the right side
+  - I want the far right corner of the table
+  - I'd like to sit farther back on the right
+  - Let me settle at the far right side
+  - The right side farther back suits me
+  - I want to position myself at the far right
+  - I'd like to approach from the far right side
+  - Move me to the distant right spot
+  - I want the right edge farthest from me
+  - I'd like to be at the far right area
+  - Bring me back on the right side
+  - I want to work from the far right corner
+  - Let me go to the far right edge
+  - I'd like the right side farther away
+  - The far right edge is my spot
+  - I want to settle at the far right side
+  - I'd like to be near the far right end of the table
+  - Move me right and farther back
+  - I want to be in the far right position
+  - I'd feel more comfortable farther back on the right
+  - Take me to the far right of the table
+  - I want the right side that's farthest from me
+  - I'd like to move to the far right corner
+  - Let me be at the far right edge
+  - The right side far end is where I'd like to be
+  - I want to approach the far right corner
+  - I'd like to position myself farther back on the right side
+  - Bring me around to the far right
+  - I want to be at the right edge farthest from where I am
+  - I'd like to sit at the far right end
+  - Move me far back on the right
+  - I want the far right side of the table
+  - I'd like to go to the farthest right corner
+  - Let me settle at the far right end
+  - The distant right spot works well for me
+  - I want to roll around to the far right side
+  - I'd like to get to the far right position
+  - Bring me to the right side far edge
+  - I want to work from the far right end
+  - I'd prefer the far right area
+  - Let me get to the far right side
+  - The far right corner is where I want to sit
+  - I want to be right there at the far right
+  - I'd like to move to the far right edge
+  - Move me back to the right side
+  - I want the spot farther back on the right
+  - I'd like to position myself at the far right end
+  - Let me get to the right side far end
+  - Being farther back on the right side works for me
+  - I want to approach from the far right side
+  - I'd like the far right spot at the table
+  - Take me to the far end on the right
+  - I want to be at the right edge farther back
+  - I'd like to roll into the far right corner
+  - Bring me to the distant right end
+  - The right side far from me is what I want
+  - I want the far right edge of the table
+  - I'd like to be positioned farther back on the right side
+  - Let me sit at the far right end
+  - I want to settle into the far right spot
+  - I want to move to the far right side
+  - I'd like to sit at the far right
+  - The far right side feels more comfortable
+  - I want to work at the far right edge of the table
+  - I'd like to shift back and orient right
+  - The far right provides a better view
+  - I can use more space if I'm on the far right
+  - I want to keep some distance while staying to the right
+  - I feel more stable in that direction
+  - Being toward the far side feels calming
+  Left Far Edge:
+  - I want to be on the far left side
+  - Move me to the far left corner
+  - I'd like the left side but farther back
+  - Let me get to the far left
+  - I want the left side that's farther from me
+  - Bring me to the left side at the far end
+  - I'd like to sit at the far left corner
+  - Move me back and to the left
+  - I want the left side at the far end
+  - Let me settle at the far left
+  - I'd like to be at the left side of the farther end
+  - The far left corner is where I want to be
+  - Move me to the left and farther back
+  - I want to approach the left side from the far end
+  - I'd like the distant left spot
+  - Bring me to the far side on the left
+  - I want to be farther back on the left side
+  - The far left area is what I need
+  - I'd like to roll around to the far left
+  - Let me be at the far left edge
+  - I want to work from the far left
+  - Move me to the far left position
+  - I'd feel better at the far left corner
+  - Take me to the left side at the far end
+  - I want the far corner on the left
+  - I'd like to move back on the left side
+  - Let me get to the far left side
+  - Move me back to the left side far end
+  - I want to be at the far left edge
+  - I'd like the spot that's distant and on the left
+  - Bring me to the far end on the left side
+  - I want the far left corner of the table
+  - I'd like to sit farther back on the left
+  - Let me settle at the far left side
+  - The left side farther back suits me
+  - I want to position myself at the far left
+  - I'd like to approach from the far left side
+  - Move me to the distant left spot
+  - I want the left edge farthest from me
+  - I'd like to be at the far left area
+  - Bring me back on the left side
+  - I want to work from the far left corner
+  - Let me go to the far left edge
+  - I'd like the left side farther away
+  - The far left edge is my spot
+  - I want to settle at the far left side
+  - I'd like to be near the far left end of the table
+  - Move me left and farther back
+  - I want to be in the far left position
+  - I'd feel more comfortable farther back on the left
+  - Take me to the far left of the table
+  - I want the left side that's farthest from me
+  - I'd like to move to the far left corner
+  - Let me be at the far left edge
+  - The left side far end is where I'd like to be
+  - I want to approach the far left corner
+  - I'd like to position myself farther back on the left side
+  - Bring me around to the far left
+  - I want to be at the left edge farthest from where I am
+  - I'd like to sit at the far left end
+  - Move me far back on the left
+  - I want the far left side of the table
+  - I'd like to go to the farthest left corner
+  - Let me settle at the far left end
+  - The distant left spot works well for me
+  - I want to roll around to the far left side
+  - I'd like to get to the far left position
+  - Bring me to the left side far edge
+  - I want to work from the far left end
+  - I'd prefer the far left area
+  - Let me get to the far left side
+  - The far left corner is where I want to sit
+  - I want to be right there at the far left
+  - I'd like to move to the far left edge
+  - Move me back to the left side
+  - I want the spot farther back on the left
+  - I'd like to position myself at the far left end
+  - Let me get to the left side far end
+  - Being farther back on the left side works for me
+  - I want to approach from the far left side
+  - I'd like the far left spot at the table
+  - Take me to the far end on the left
+  - I want to be at the left edge farther back
+  - I'd like to roll into the far left corner
+  - Bring me to the distant left end
+  - The left side far from me is what I want
+  - I want the far left edge of the table
+  - I'd like to be positioned farther back on the left side
+  - Let me sit at the far left end
+  - I want to settle into the far left spot
+  - I want to move to the far left side
+  - I'd like to sit at the far left
+  - I want to work at the far left edge
+  - I can orient my body more easily at the far left
+  - I can move my arm comfortably there
+  - I feel more stable at the far left side
+  - The far left provides a usable arrangement
+  - I want a spot where I can settle my gaze easily
+  - That side feels natural
+  - That area feels right
+  Left Near Edge:
+  - I want to be close on the left side
+  - Move me to the near left corner
+  - I'd like the left side but up close
+  - Let me get to the near left
+  - I want to be at the left side near me
+  - Bring me to the left side close in
+  - I'd like to sit at the near left corner
+  - Move me up close on the left
+  - I want the left side that's nearest to me
+  - Let me settle at the near left
+  - I'd like to be at the left side of the closer end
+  - The near left corner is where I want to be
+  - Move me to the left and close in
+  - I want to approach the left side from the near end
+  - I'd like the close left spot
+  - Bring me to the near side on the left
+  - I want to be right up close on the left side
+  - The near left area is what I need
+  - I'd like to roll up on the left side
+  - Let me be close on the left edge
+  - I want to work from the near left
+  - Move me to the near left position
+  - I'd feel better at the near left corner
+  - Take me to the left side close to me
+  - I want the near corner on the left
+  - I'd like to tuck in close on the left
+  - Let me get to the near left side
+  - Move me up to the left side near end
+  - I want to be at the near left edge
+  - I'd like the spot that's close and on the left
+  - Bring me to the near end on the left side
+  - I want the close left corner of the table
+  - I'd like to sit close in on the left
+  - Let me settle near the left side
+  - The left side up close suits me
+  - I want to position myself at the near left
+  - I'd like to approach from the near left side
+  - Move me to the close left spot
+  - I want the left edge nearest to me
+  - I'd like to be at the near left area
+  - Bring me close on the left side
+  - I want to work from the near left corner
+  - Let me go to the near left edge
+  - I'd like the left side close by
+  - The near left edge is my spot
+  - I want to settle close on the left side
+  - I'd like to be near the left end of the table
+  - Move me left and close to the edge
+  - I want to be in the near left position
+  - I'd feel more comfortable close on the left
+  - Take me to the near left of the table
+  - I want the left side that's closest to me
+  - I'd like to tuck into the near left corner
+  - Let me be at the close left edge
+  - The left side near end is where I'd like to be
+  - I want to approach the near left corner
+  - I'd like to position myself close on the left side
+  - Bring me around to the near left
+  - I want to be at the left edge nearest to where I am
+  - I'd like to sit at the near left end
+  - Move me close on the left
+  - I want the near left side of the table
+  - I'd like to go to the closest left corner
+  - Let me settle at the near left end
+  - The close left spot works well for me
+  - I want to roll up close on the left side
+  - I'd like to get to the near left position
+  - Bring me to the left side near edge
+  - I want to work close on the left end
+  - I'd prefer the near left area
+  - Let me get close on the left side
+  - The near left corner is where I want to sit
+  - I want to be right there on the near left
+  - I'd like to move to the near left edge
+  - Move me up close to the left side
+  - I want the spot close in on the left
+  - I'd like to position myself at the near left end
+  - Let me get to the left side near end
+  - Being close on the left side works for me
+  - I want to approach from the close left side
+  - I'd like the near left spot at the table
+  - Take me to the near end on the left
+  - I want to be at the left edge close in
+  - I'd like to roll into the near left corner
+  - Bring me to the close left end
+  - The left side near to me is what I want
+  - I want the near left edge of the table
+  - I'd like to be positioned close on the left side
+  - Let me sit close on the left end
+  - I want to settle into the near left spot
+  - I want the near left spot
+  - I prefer the near left side where I can rest my hand
+  - I'd like to shift slightly left from here
+  - The near left area is easy to move in
+  - I want to come closer and orient left
+  - I want the position where my left hand works naturally
+  - The near left area feels comfortable
+  - I'd like a spot where I can sit left without moving far
+  - This general area feels easy to be in
+  - This spot feels right
