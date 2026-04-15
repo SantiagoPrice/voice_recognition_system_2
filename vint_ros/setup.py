@@ -9,7 +9,7 @@ setup(
     name=package_name,
     version='0.0.0',
     packages=[package_name],
-    install_requires=['setuptools','vosk','sounddevice'],
+    install_requires=['setuptools','vosk','sounddevice','google-genai'],
     zip_safe=True,
     maintainer='orin',
     maintainer_email='makino@ai.iit.tsukuba.ac.jp',
