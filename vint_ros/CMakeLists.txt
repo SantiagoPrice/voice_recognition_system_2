@@ -16,6 +16,7 @@ install(PROGRAMS
   vint_ros/vosk_node.py
   vint_ros/voice_assist_ROS_woGUI.py
   vint_ros/Assesment_node.py
+  vint_ros/Assesment_text_node.py
   vint_ros/Perception_node.py
   vint_ros/Edge_Labeling_node.py
   vint_ros/Task_Manager_node.py

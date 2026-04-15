@@ -1,46 +1,24 @@
-import sys
+
 import os
-import json
-import vosk
-import sounddevice as sd
-import queue
-import threading
-import rclpy
 import requests
 import time
-import numpy as np
-import pyttsx3
-import math
-import random
-import pandas as pd
-from rclpy.node import Node
-from rclpy.parameter import Parameter as RclpyParameter
-from rclpy.executors import MultiThreadedExecutor
-from rcl_interfaces.msg import Parameter as MsgParameter, ParameterType, ParameterValue
-from rcl_interfaces.srv import SetParameters
-from vosk import Model, KaldiRecognizer , GpuInit
-from ament_index_python.packages import get_package_share_directory
-from geometry_msgs.msg import TransformStamped, PoseStamped
-from visualization_msgs.msg import Marker
-from tf2_ros import TransformBroadcaster
-from builtin_interfaces.msg import Duration
-from geometry_msgs.msg import Point
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
 import yaml
 import re
+from google import genai
 
 
 
 #pkg_path = get_package_share_directory('vint_ros')
-pkg_path="/mnt/orin_ssd/workspaces/isaac_ros-dev/src/voice_recognition_system"
+pkg_path="/home/sip-mobility/docker_projects/nav2_ws/src/voice_recognition_system/vint_ros/"
 
-DB_PATH = os.path.join(pkg_path,'others/data_base.yaml')
+DB_PATH = os.path.join(pkg_path,'others/data_base_100.yaml')
 PROMPT_PATH = os.path.join(pkg_path,'others/prompts.yaml')
-API_PATH =  os.path.join(pkg_path,'others/conf.yaml')
+API_PATH =  os.path.join(pkg_path,'conf/conf.yaml')
 
 with open(DB_PATH, "r") as f:
-    db_handlr= yaml.safe_load(f)["db_test"]
+    db_handlr= yaml.safe_load(f)["db_full"]
 
 with open(PROMPT_PATH, "r") as f:
     prompt_handlr= yaml.safe_load(f)
@@ -48,6 +26,7 @@ with open(PROMPT_PATH, "r") as f:
 with open(API_PATH, "r") as f:
     conf_handlr= yaml.safe_load(f)
     API_KEY = ' '
+    API_KEY2 = conf_handlr["key2"]
     API_KEY_OR = conf_handlr["key_or"]
 
 
@@ -59,13 +38,27 @@ class VoiceRecognition():
         print("===================================================")
         self.prompts=prompt_handlr
         self.db=db_handlr
-        self.source="Open Router"
+        self.cases = list(self.db.keys())
+        self.cs_str=0 # Case to start from
+        self.i_str=0  # Index to start from
+        self.keys=[]
+
+        if API_KEY:
+            self.source = "Genai"
+            self.keys.append(API_KEY)
+            if API_KEY2:
+                self.keys.append(API_KEY2)
+        elif API_KEY_OR:
+            self.source="Open Router"
+        else:
+            raise ValueError("NO API key")
+        
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def run(self):     
         TF = "origin"
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"prompt_test_{timestamp}.xlsx"
-        header = ["Answer Label", "Request", "LLM Output", "Judged Label", "True/False"]
+        header = ["Answer Label", "Request", "LLM Output", "Judged Label", "True/False", "Latency"]
 
         wb = Workbook()
         ws = wb.active
@@ -75,20 +68,27 @@ class VoiceRecognition():
         for lab , exs in self.db.items():
             wb = load_workbook(filename)
             ws = wb.active
-            print(f"label{lab}")
 
-            for text in exs:
+            if self.cases.index(lab)<self.cs_str:
+                continue
 
-                out_LLM = self.LLM(self.LLM(text,"pose_select_both_examples_light_IDK_exs"))
-                judged_label=self.result_edge(out_LLM)
-                TF= judged_label == lab
+            for i, text in enumerate(exs):
+                
+                if self.cases.index(lab)<(self.cs_str+1) and i < self.i_str:
+                    continue
+                print(f"Label: {lab}, Example {i}")
+                start= datetime.now()
+                out_LLM = self.LLM(text,"ppose_select_both_examples_light_IDK_exs_cons_claude_extra")
+                lat= (datetime.now()-start).total_seconds()
+                judged_label= self.result_edge(out_LLM)
+                TF= int(judged_label == lab)
 
-                ws.append([lab, text, out_LLM, judged_label, TF])
+                ws.append([lab, text, out_LLM, judged_label, TF , lat])
 
                 wb.save(filename)
 
                 print("------------------------")
-                time.sleep(10)
+                time.sleep(3)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def LLM(self, text , prompt_key):
@@ -99,22 +99,29 @@ class VoiceRecognition():
             if self.source=="Open Router":
                 API_URL = "https://openrouter.ai/api/v1/chat/completions"
                 headers = {"Authorization": f"Bearer {API_KEY_OR}","Content-Type": "application/json"}
-                data = {"model": "google/gemma-3n-e4b-it:free","messages": [{"role": "user", "content": prompt}]}
+                data = {"model": "google/gemma-3n-7b-it:free","messages": [{"role": "user", "content": prompt}]}
                 
                 result = requests.post(API_URL, json=data, headers=headers)
+                print(result)
 
                 try:
                     output = result["choices"][0]["message"]["content"]
                 except KeyError:
                     print("KeyError in result, full content:", result)
+                except TypeError:
+                    print("PrintError in result, full content:", result)
 
-            # else:
-            #     client = genai.Client(api_key=API_KEY)
-            #     response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
-            #     output = response.text
+
+            else:
+                key=self.keys.pop(0)
+                client = genai.Client(api_key=key)
+                response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+                #response = self.call_with_retry(client.models.generate_content,model="gemma-3-4b", contents=prompt)
+                output = response.text
+                self.keys.append(key)
             
 
-            print("Assistant:", output)
+                print("Assistant:", output)
             return output
  
 
@@ -126,19 +133,41 @@ class VoiceRecognition():
    
         LLM_lower = LLM_out.split(".")[-2].casefold()  #Picking the last sentence of the LLM response
 
-        for labels in self.edges.keys():
+        for labels in self.cases:
             parts = [p.strip() for p in labels.split(" / ")]
             for part in parts:
                 pattern = rf"\b{re.escape(part.casefold())}\b"
                 if re.search(pattern, LLM_lower):
-                    self.out_edge = part
+                    
 
-                    return
+                    return part
 
         if self.out_edge is None:
-            self.get_logger().warn(f"""No matching edge found in LLM output: "{LLM_lower}" """)
+            print(f"""No matching edge found in LLM output: "{LLM_lower}" """)
+            #self.get_logger().warn(f"""No matching edge found in LLM output: "{LLM_lower}" """)
         else:
-            self.get_logger().info(f"(Matching Edge: {self.out_edge}")
+            print(f"(Matching Edge: {self.out_edge}")
+            #self.get_logger().info(f"(Matching Edge: {self.out_edge}")
+        return None
+    
+    def call_with_retry(func, *args, max_retries=5, **kwargs):
+        """Call a Gemini API function with automatic retry on 429 errors."""
+        for attempt in range(max_retries):
+            try:
+                return func(*args, **kwargs)
+            
+            except genai.errors.ClientError as e:
+                if e.code != 429:
+                    raise  # re-raise if it's not a quota error
+
+                # Extract retry delay from error message if available
+                match = re.search(r'retry in (\d+(?:\.\d+)?)s', str(e))
+                wait = float(match.group(1)) if match else 60
+
+                print(f"[Attempt {attempt+1}/{max_retries}] Rate limited. Waiting {wait:.1f}s...")
+                time.sleep(wait + 1)  # +1s buffer
+
+        raise RuntimeError(f"Failed after {max_retries} retries.")
 
 ##############################################################
 def main():
