@@ -1,0 +1,261 @@
+db_full:
+  Close Edge:
+    - I'd like to move a bit closer to the table
+    - I want to move toward the near side
+    - I'd like to move forward from here
+    - I want the spot where I can reach easily
+    - The nearer position is easier for working
+    - I'd like to sit toward the front
+    - I'd like to bring my body closer to the table
+    - The near edge is easier for me to use
+    - I feel more comfortable around here
+    - This side feels more natural
+
+  Distant Edge:
+    - I want to be a bit farther from the table
+    - I'd like to sit toward the far side
+    - I'd like to maintain some distance
+    - I'd like to move around to the far side
+    - I'd like to move back a little
+    - The far position feels calmer
+    - I'd like the side that gives me a wide view
+    - I want to work from the far side
+    - Being a little away feels easier
+    - The far area feels more spacious
+
+  Right Edge:
+    - I want to move to the right side
+    - I'd like to move around to the right
+    - I want to go to the right edge
+    - I'd like the side where I can use my right hand easily
+    - I'd like to shift slightly to the right from here
+    - I want to sit facing to the right
+    - The right side surface is easier to work with
+    - My posture feels more stable when shifted right
+    - That direction feels natural
+    - The right direction feels right
+
+  Left Edge:
+    - I want to move to the left side
+    - I'd like to move around to the left
+    - I want to go to the left edge
+    - I'd like the side where I can use my left hand easily
+    - I'd like to shift a little to the left from here
+    - I want to sit facing to the left
+    - The left side surface is easier to work with
+    - My posture feels natural on the left side
+    - The left direction feels calming
+    - This orientation feels right
+
+  Right Near Edge:
+    - I want to move to the near right side
+    - I'd like the near right spot where I can rest my hand
+    - I want to sit closer on the right side
+    - I'd like to shift slightly to the right from here
+    - The near right edge is easier for me to reach
+    - The near right area is easier for working
+    - I want to come around to the near right side
+    - I'd like the spot where my right hand moves easily
+    - I can naturally face that side
+    - This general area feels comfortable
+
+  Right Far Edge:
+    - I want to move to the far right side
+    - I'd like to sit at the far right
+    - The far right side feels more comfortable
+    - I want to work at the far right edge of the table
+    - I'd like to shift back and orient right
+    - The far right provides a better view
+    - I can use more space if I'm on the far right
+    - I want to keep some distance while staying to the right
+    - I feel more stable in that direction
+    - Being toward the far side feels calming
+
+  Left Far Edge:
+    - I want to move to the far left side
+    - I'd like to sit at the far left
+    - I want to work at the far left edge
+    - I can orient my body more easily at the far left
+    - I can move my arm comfortably there
+    - I feel more stable at the far left side
+    - The far left provides a usable arrangement
+    - I want a spot where I can settle my gaze easily
+    - That side feels natural
+    - That area feels right
+
+  Left Near Edge:
+    - I want the near left spot
+    - I prefer the near left side where I can rest my hand
+    - I'd like to shift slightly left from here
+    - The near left area is easy to move in
+    - I want to come closer and orient left
+    - I want the position where my left hand works naturally
+    - The near left area feels comfortable
+    - I'd like a spot where I can sit left without moving far
+    - This general area feels easy to be in
+    - This spot feels right
+
+  I don't know:
+      - This orientation feels right
+      - This side feels more natural
+      - I'd like to face a comfortable direction
+      - This angle feels about right
+      - I want to settle into a natural position
+      - This feels like a good spot to work from
+      - I can see myself being productive here
+      - This feels like a balanced position
+      - I'd like to stay in a spot that feels easy
+      - The space around here feels right
+      - I'd like to shift back and orient right
+      - This general area feels comfortable
+      - I can naturally face that side
+      - This spot feels right
+      - I want to sit closer on the right side
+      - I feel more stable in that direction
+      - That area feels right
+      - I want a position where things feel balanced
+      - This part of the table feels accessible
+      - I'd like to settle somewhere that feels natural
+
+
+db_no_unclear:
+  Close Edge:
+    - I'd like to move a bit closer to the table
+    - I want to move toward the near side
+    - I'd like to move forward from here
+    - I want the spot where I can reach easily
+    - The nearer position is easier for working
+    - I'd like to sit toward the front
+    - I'd like to bring my body closer to the table
+    - The near edge is easier for me to use
+    - I feel more comfortable around here
+    - This side feels more natural
+
+  Distant Edge:
+    - I want to be a bit farther from the table
+    - I'd like to sit toward the far side
+    - I'd like to maintain some distance
+    - I'd like to move around to the far side
+    - I'd like to move back a little
+    - The far position feels calmer
+    - I'd like the side that gives me a wide view
+    - I want to work from the far side
+    - Being a little away feels easier
+    - The far area feels more spacious
+
+  Right Edge:
+    - I want to move to the right side
+    - I'd like to move around to the right
+    - I want to go to the right edge
+    - I'd like the side where I can use my right hand easily
+    - I'd like to shift slightly to the right from here
+    - I want to sit facing to the right
+    - The right side surface is easier to work with
+    - My posture feels more stable when shifted right
+    - That direction feels natural
+    - The right direction feels right
+
+  Left Edge:
+    - I want to move to the left side
+    - I'd like to move around to the left
+    - I want to go to the left edge
+    - I'd like the side where I can use my left hand easily
+    - I'd like to shift a little to the left from here
+    - I want to sit facing to the left
+    - The left side surface is easier to work with
+    - My posture feels natural on the left side
+    - The left direction feels calming
+    - This orientation feels right
+
+  Right Near Edge:
+    - I want to move to the near right side
+    - I'd like the near right spot where I can rest my hand
+    - I want to sit closer on the right side
+    - I'd like to shift slightly to the right from here
+    - The near right edge is easier for me to reach
+    - The near right area is easier for working
+    - I want to come around to the near right side
+    - I'd like the spot where my right hand moves easily
+    - I can naturally face that side
+    - This general area feels comfortable
+
+  Right Far Edge:
+    - I want to move to the far right side
+    - I'd like to sit at the far right
+    - The far right side feels more comfortable
+    - I want to work at the far right edge of the table
+    - I'd like to shift back and orient right
+    - The far right provides a better view
+    - I can use more space if I'm on the far right
+    - I want to keep some distance while staying to the right
+    - I feel more stable in that direction
+    - Being toward the far side feels calming
+
+  Left Far Edge:
+    - I want to move to the far left side
+    - I'd like to sit at the far left
+    - I want to work at the far left edge
+    - I can orient my body more easily at the far left
+    - I can move my arm comfortably there
+    - I feel more stable at the far left side
+    - The far left provides a usable arrangement
+    - I want a spot where I can settle my gaze easily
+    - That side feels natural
+    - That area feels right
+
+  Left Near Edge:
+    - I want the near left spot
+    - I prefer the near left side where I can rest my hand
+    - I'd like to shift slightly left from here
+    - The near left area is easy to move in
+    - I want to come closer and orient left
+    - I want the position where my left hand works naturally
+    - The near left area feels comfortable
+    - I'd like a spot where I can sit left without moving far
+    - This general area feels easy to be in
+    - This spot feels right
+
+db_test:
+  Close Edge:
+    - I'd like to move a bit closer to the table
+    - I want to move toward the near side
+
+  Distant Edge:
+    - I want to be a bit farther from the table
+    - I'd like to sit toward the far side
+
+  Right Edge:
+    - I want to move to the right side
+    - I'd like to move around to the right
+
+
+  Left Edge:
+    - I want to move to the left side
+    - I'd like to move around to the left
+
+
+  Right Near Edge:
+    - I want to move to the near right side
+    - I'd like the near right spot where I can rest my hand
+
+
+  Right Far Edge:
+    - I want to move to the far right side
+    - I'd like to sit at the far right
+
+
+  Left Far Edge:
+    - I want to move to the far left side
+    - I'd like to sit at the far left
+
+
+  Left Near Edge:
+    - I want the near left spot
+    - I prefer the near left side where I can rest my hand
+
+
+  I don't know:
+      - This orientation feels right
+      - This side feels more natural
+      - I'd like to shift back and orient right
+      - This general area feels comfortable
