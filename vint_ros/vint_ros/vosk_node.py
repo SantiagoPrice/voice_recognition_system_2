@@ -16,9 +16,11 @@ import math
 import rclpy
 from rclpy.node import Node
 from vosk import Model, GpuInit
-from std_msgs.msg import String
+from std_msgs.msg import String , UInt8MultiArray
 from ament_index_python.packages import get_package_share_directory
 import yaml
+
+import threading
 
 
 
@@ -52,7 +54,26 @@ class VoiceRecognition(Node):
         self.stop = False
         self.flag = 0
         self.pub_text = self.create_publisher(String, "/command", 10)
+
+        self.subscription = self.create_subscription(
+            UInt8MultiArray,
+            '/ESP32/raw', 
+            self.listener_callback,
+            10
+        )
+
+        self.read = False
+
         print("===================================================")
+
+
+    def listener_callback(self, msg):
+        if not msg.data:
+            return
+
+        self.read=True
+        print("Button pressed")
+
 
     def run(self):
         samplerate = int(sd.query_devices(None, "input")["default_samplerate"])
@@ -72,12 +93,14 @@ class VoiceRecognition(Node):
                 volume =  np.max(np.abs(audio_np))/ 32768.0
            
                 # threshold_of_volume
-                if volume < 0.15:
+                if volume < 0.0:  # Nosaka:changed the value from 0.15 to 0 (This means "no threshold")
                         # print("Listening...")
                         pass
                 else:
-                    self.read=True
-                    print(f"Volume: {volume:.4f}")
+                    # self.read=True
+                    if self.read:
+                        print(f"Volume: {volume:.4f}")
+                    # pass
                     #result = json.loads(rec.Result())
                     #text = result.get("text", "").strip().lower()
                     #self.get_logger().info(text)
@@ -100,10 +123,20 @@ class VoiceRecognition(Node):
                         self.pub_text.publish(command)
                     
     
-def main():
-    rclpy.init()
+def main(args=None):
+    rclpy.init(args=args)
     voice = VoiceRecognition()
-    voice.run() 
+    # voice.run() 
+
+    try:
+        thread = threading.Thread(target=voice.run)
+        thread.start()
+        rclpy.spin(voice)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        voice.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
         main()
