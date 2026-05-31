@@ -29,9 +29,9 @@ class Phase1TrigVint(Node):
 
     def listener_callback(self,msg):
             # Send a navigation goal to Nav2 when the message "go" is received
-            if not "table" in msg.data:
-                self.get_logger().info(f"Received command: {msg.data}, ignoring.")
-                return
+            # if not "table" in msg.data:
+            #     self.get_logger().info(f"Received command: {msg.data}, ignoring.")
+            #     return
             g_msg = NavigateToPose.Goal()
             g_msg.pose = PoseStamped()
             g_msg.pose.header.frame_id = 'map'
