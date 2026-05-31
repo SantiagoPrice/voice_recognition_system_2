@@ -5,7 +5,6 @@ import rclpy
 import requests
 from google import genai
 import math
-from rclpy.node import Node
 from ament_index_python.packages import get_package_share_directory
 from visualization_msgs.msg import Marker
 from std_msgs.msg import String
@@ -14,13 +13,19 @@ import ast
 import re
 import yaml
 from ament_index_python.packages import get_package_share_directory
-
+from custom_msgs.action import VoiceConfirmation
+from rclpy.node import Node
+from rclpy.action import ActionServer
+from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
+import threading
+import subprocess
 
 
 pkg_path = get_package_share_directory('vint_ros')
 API_PATH = os.path.join(pkg_path,'conf/conf.yaml')
 PROMPT_PATH = os.path.join(pkg_path,'others/prompts.yaml')
-
+AUDIO_PATH = os.path.join(pkg_path,'others/audio_samples/eng/')
 
 with open(API_PATH, "r") as f:
     conf_handlr= yaml.safe_load(f)
@@ -43,7 +48,18 @@ class TaskManager(Node):
         self.cmd_last = None
         self.cmd_received_once = False
         self.prompts = prompt_handlr
-        
+        self.is_LLM_enabled = True
+        self.text= ""
+        self._lock=threading.Lock()
+
+        #---- VoiceConfirmation action in 2nd thread ----
+        self._cb_group = ReentrantCallbackGroup()
+        self._action_server = ActionServer(self,
+                                           VoiceConfirmation, 
+                                           'voice_confirmation', 
+                                           self.execute_callback,
+                                           callback_group=self._cb_group)
+
         # ---- subscriptions ----
         self.sub_edge = self.create_subscription(String, "/edge_list", self.cb_edge, 10)
         self.sub_cmd = self.create_subscription(String, "/command", self.cb_command, 10)
@@ -62,6 +78,53 @@ class TaskManager(Node):
         
         self.get_logger().info(f"LLM connected via {self.source}")
            
+    def execute_callback(self, goal_handle):
+        self.timeout_flag = False
+        with self._lock:
+            self.is_LLM_enabled = False
+        self.get_logger().info("VoiceConfirmation action started.")
+        request = goal_handle.request.request
+        duration = goal_handle.request.duration
+
+        if request =="OpenDoor":
+            key_words = ["open", "door"]
+            audio_file= AUDIO_PATH + "OpenDoor.wav"
+        elif request=="GetFood":
+            key_words = ["get", "food"]
+            audio_file= AUDIO_PATH + "GetFood.wav"
+        elif request=="CloseDoor":
+            key_words = ["close", "door"]
+            audio_file= AUDIO_PATH + "CloseDoor.wav"
+        else:
+            self.get_logger().warn(f"Unknown request received in action: {request}")
+            goal_handle.abort()
+            return VoiceConfirmation.Result()
+
+        subprocess.run(['pulseaudio','--start'])
+        subprocess.run(['aplay','-D','hw:0,3','-f','S16_LE','-r','44100','-c','2','-d','1','/dev/zero'])
+        subprocess.run(['aplay',audio_file])
+
+        def timeout_callback():
+            self.timeout_flag = True
+            self.get_logger().info("VoiceConfirmation action timed out.")
+        timer = self.create_timer(duration, timeout_callback)
+
+        while not self.timeout_flag:
+            if any([word in self.text for word in key_words]):
+                self.get_logger().info(f"VoiceConfirmation action succeeded with text: {self.text}")
+                goal_handle.succeed()
+                break
+        timer.cancel()
+
+        if self.timeout_flag:
+            goal_handle.abort()
+
+        with self._lock:
+            self.is_LLM_enabled = True
+            self.timeout_flag = False
+            self.text=""
+        return VoiceConfirmation.Result()
+
 
     def cb_edge(self, msg: String):
         text = msg.data.strip()
@@ -81,19 +144,24 @@ class TaskManager(Node):
 
 
     def cb_command(self, msg: String):
-        text = msg.data.strip()
-        if not text:
+        with self._lock:
+            self.text = msg.data.strip()
+            if not self.text:
+                self.text=""
+                return     
+            LLM_used = self.is_LLM_enabled
+        if not LLM_used:
             return
         # first time => always process
         if not self.cmd_received_once:
             self.cmd_received_once = True
-            self.cmd_last = text
-            self.on_command_update(text)
+            self.cmd_last = self.text
+            self.on_command_update(self.text)
             return
         # changed => process
-        if text != self.cmd_last:
-            self.cmd_last = text
-            self.on_command_update(text)
+        if self.text != self.cmd_last:
+            self.cmd_last = self.text
+            self.on_command_update(self.text)
 
 
     def on_edge_update(self, edge_text: str):
@@ -258,8 +326,11 @@ def main():
     rclpy.init()
     node = TaskManager()
 
+    executor = MultiThreadedExecutor()
+    executor.add_node(node)
+
     try:
-        rclpy.spin(node)
+        executor.spin()
 
     except KeyboardInterrupt:
         pass
