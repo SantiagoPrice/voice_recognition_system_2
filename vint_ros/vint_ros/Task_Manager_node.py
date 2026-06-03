@@ -5,6 +5,7 @@ import rclpy
 import requests
 from google import genai
 import math
+from geometry_msgs.msg import PoseStamped
 from ament_index_python.packages import get_package_share_directory
 from visualization_msgs.msg import Marker
 from std_msgs.msg import String
@@ -16,15 +17,27 @@ from ament_index_python.packages import get_package_share_directory
 from custom_msgs.action import VoiceConfirmation
 from rclpy.node import Node
 from rclpy.action import ActionServer
-from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.callback_groups import ReentrantCallbackGroup , MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
+from rcl_interfaces.srv import SetParameters    
+from rcl_interfaces.msg import ParameterValue, Parameter as ParameterMsg
+from lifecycle_msgs.srv import ChangeState
+from lifecycle_msgs.msg import Transition
+from rclpy.parameter import Parameter
+from nav2_msgs.action import NavigateToPose
+from rclpy.action import ActionClient
 import threading
 import subprocess
+import time
+
 
 
 pkg_path = get_package_share_directory('vint_ros')
+pkg_bts_path = os.path.join(get_package_share_directory('bts'),'behavior_trees')
 API_PATH = os.path.join(pkg_path,'conf/conf.yaml')
+YOLO_PATH = os.path.join(pkg_path,'others/YOLO11_labels.yaml')
 PROMPT_PATH = os.path.join(pkg_path,'others/prompts.yaml')
+BT_PATH = os.path.join(pkg_path,'others/bts.yaml')
 AUDIO_PATH = os.path.join(pkg_path,'others/audio_samples/eng/')
 
 with open(API_PATH, "r") as f:
@@ -32,9 +45,14 @@ with open(API_PATH, "r") as f:
     API_KEY = conf_handlr["key"]
     API_KEY_OR = conf_handlr["key_or"]
 
+with open(YOLO_PATH, "r") as f:
+    yolo_labels= yaml.safe_load(f)
 
 with open(PROMPT_PATH, "r") as f:
     prompt_handlr= yaml.safe_load(f)
+
+with open(BT_PATH, "r") as f:
+    bt_handlr= yaml.safe_load(f)
 
 
 class TaskManager(Node):
@@ -50,15 +68,37 @@ class TaskManager(Node):
         self.prompts = prompt_handlr
         self.is_LLM_enabled = True
         self.text= ""
+        self.dock_query_criter= "Object" # "Object&Side" How to consider both criterias with the LLM?
         self._lock=threading.Lock()
-
+        self.class_id =None
+        # --- Action---
+        self._nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
         #---- VoiceConfirmation action in 2nd thread ----
-        self._cb_group = ReentrantCallbackGroup()
+        self._act_group = MutuallyExclusiveCallbackGroup()
         self._action_server = ActionServer(self,
                                            VoiceConfirmation, 
                                            'voice_confirmation', 
                                            self.execute_callback,
-                                           callback_group=self._cb_group)
+                                           callback_group=self._act_group)
+
+        #-----  Services -----
+        #self._cli_group = MutuallyExclusiveCallbackGroup()
+
+        self.is_pcl_set = False
+        self._lock_pcl = threading.Lock()
+        self.set_params_cli_pcl = self.create_client(SetParameters,
+                                                     "/tracker_with_cloud_node/set_parameters")    
+        while not self.set_params_cli_pcl.wait_for_service(timeout_sec=2.0):
+            self.get_logger().info("Waiting for 'tracker_with_cloud_node' service...")
+        self.get_logger().info("'tracker_with_cloud_node' service client ready!")
+
+        self.is_perc_set = False
+        self._lock_perc = threading.Lock()
+        self.set_params_cli_perc = self.create_client(SetParameters,
+                                                      "/plane_cloud_processor_node/set_parameters")
+        while not self.set_params_cli_perc.wait_for_service(timeout_sec=2.0):
+            self.get_logger().info("Waiting for 'plane_cloud_processor_node' service...")
+        self.get_logger().info("'plane_cloud_processor_node' service client ready!")
 
         # ---- subscriptions ----
         self.sub_edge = self.create_subscription(String, "/edge_list", self.cb_edge, 10)
@@ -152,16 +192,23 @@ class TaskManager(Node):
             LLM_used = self.is_LLM_enabled
         if not LLM_used:
             return
+        
+        #Predefining which dockink modality to use 
+        if self.dock_query_criter == "Object":
+            on_command_update=self.on_command_update_obj
+        else:
+            on_command_update=self.on_command_update_side
+
         # first time => always process
         if not self.cmd_received_once:
             self.cmd_received_once = True
             self.cmd_last = self.text
-            self.on_command_update(self.text)
+            on_command_update(self.text)
             return
         # changed => process
         if self.text != self.cmd_last:
             self.cmd_last = self.text
-            self.on_command_update(self.text)
+            on_command_update(self.text)
 
 
     def on_edge_update(self, edge_text: str):
@@ -188,10 +235,10 @@ class TaskManager(Node):
         self.get_logger().info("-----------------------------------------\n")
 
 
-    def on_command_update(self, command_text: str):
+    def on_command_update_side(self, command_text: str):
         if self.edges is None:
             return
-
+        
         self.get_logger().info(f"received command {command_text}")
         out_LLM = self.LLM(command_text,"pose_select_both_examples_light")
         self.result_edge(out_LLM)
@@ -212,12 +259,34 @@ class TaskManager(Node):
             self.LLM_out.publish(out_LLM_msg)
             self.prediction.publish(trigger)
             self.get_logger().info(f"prediction trigger")
-        
+
+    def on_command_update_obj(self, command_text: str):
+
+        self.get_logger().info(f"received command for obj docking: {command_text}")
+        class_check = [class_ in command_text for class_ in yolo_labels.values()]
+        time.sleep(0.05)
+
+        if any(class_check):
+            self.class_id = [class_ in command_text for class_ in yolo_labels.values()].index(True)
+    
+            self.get_logger().info(f"Selected target: {list(yolo_labels.values())[self.class_id]}")
+
+            self.set_param("GOAL",
+                           str(self.class_id) , 
+                           self.set_params_cli_pcl , 
+                           "is_pcl_set")
+
+            self.set_param("mode",
+                           "Phase 3" , 
+                           self.set_params_cli_perc , 
+                           "is_perc_set")
+
+        else:
+            self.get_logger().warn("No class matches the command, skip.")
 
     def both_ready(self) -> bool:
         return self.edge_received_once and self.cmd_received_once
-        
-        
+
     def LLM(self, text , prompt_key):
 
         base_prompt= self.prompts[prompt_key]
@@ -226,7 +295,7 @@ class TaskManager(Node):
         if self.source=="Open Router":
             API_URL = "https://openrouter.ai/api/v1/chat/completions"
             headers = {"Authorization": f"Bearer {API_KEY_OR}","Content-Type": "application/json"}
-            data = {"model": "google/gemma-3n-e4b-it:free","messages": [{"role": "user", "content": prompt}]}
+            data = {"model": "google/gemini-3.5-flash","messages": [{"role": "user", "content": prompt}]}
             
             result = requests.post(API_URL, json=data, headers=headers)
 
@@ -237,7 +306,7 @@ class TaskManager(Node):
 
         else:
             client = genai.Client(api_key=API_KEY)
-            response = client.models.generate_content(model="gemma-3n-e4b-it", contents=prompt)
+            response = client.models.generate_content(model="gemini-3-4b-flash", contents=prompt)
             output = response.text
         
 
@@ -269,8 +338,52 @@ class TaskManager(Node):
         else:
             self.get_logger().info(f"(Matching Edge: {self.out_edge}: {self.out_edge_pose})")
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def set_param(self,name,value,param_client,flag_attr):
+        # Set docking_id parameter
+        request = SetParameters.Request()
+        param_value = ParameterValue()
+        param_value.type = Parameter.Type.STRING.value
+        param_value.string_value = value
+
+
+        new_parameter = ParameterMsg()
+        new_parameter.name = name
+        new_parameter.value = param_value
+        request.parameters = [new_parameter]
+
+        def param_callback(future):
+            if future.result() is not None:
+                self.get_logger().info(f"{name} parameter was succesfully set to {value}.")
+                setattr(self, flag_attr, True) 
+                self.send_goal_attempt()
+            else:
+                self.get_logger().error(f"Failed to set {name} parameter. Shutting down.")
+                rclpy.shutdown()
+                raise SystemExit("Failed to set parameter.")
+
+        future = param_client.call_async(request)
+        future.add_done_callback(param_callback)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+    def send_goal_attempt(self):
+        if not self.is_pcl_set  or not self.is_perc_set:
+            self.get_logger().warn("Not all prerequisites are met.")
+            return
+ 
+        self.is_pcl_set= False
+        self.is_perc_set= False
+
+        bt_path = os.path.join(pkg_bts_path,bt_handlr[self.class_id])
+
+        self.get_logger().info("Sending goal attempt...")
+        # Send the goal to the action server
+        goal = NavigateToPose.Goal()
+        goal.behavior_tree = bt_path
+        self._nav_client.send_goal_async(goal)
 
     def create_arrow_marker(self, name, frame_id="map"):
         marker = Marker()
@@ -341,11 +454,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-

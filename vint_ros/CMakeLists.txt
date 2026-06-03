@@ -3,6 +3,7 @@ project(vint_ros)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
+find_package(bts REQUIRED)
 
 
 
