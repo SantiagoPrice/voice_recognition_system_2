@@ -55,6 +55,7 @@ class VoiceRecognition(Node):
         self.flag = 0
         self.pub_text = self.create_publisher(String, "/command", 10)
 
+        # Create a subscriber for button
         self.subscription = self.create_subscription(
             UInt8MultiArray,
             '/ESP32/raw', 
@@ -63,15 +64,17 @@ class VoiceRecognition(Node):
         )
 
         self.read = False
+        self.mutex=threading.Lock()
 
         print("===================================================")
 
 
+    # Callback function for subscriber
     def listener_callback(self, msg):
         if not msg.data:
             return
-
-        self.read=True
+        with self.mutex:
+            self.read=True
         print("Button pressed")
 
 
@@ -97,13 +100,15 @@ class VoiceRecognition(Node):
                         # print("Listening...")
                         pass
                 else:
-                    # self.read=True
-                    if self.read:
-                        print(f"Volume: {volume:.4f}")
-                    # pass
-                    #result = json.loads(rec.Result())
-                    #text = result.get("text", "").strip().lower()
-                    #self.get_logger().info(text)
+                    if threshold_mode:
+                        self.read=True
+                    with self.mutex:    
+                        if self.read:
+                            print(f"Volume: {volume:.4f}")
+                        # pass
+                        #result = json.loads(rec.Result())
+                        #text = result.get("text", "").strip().lower()
+                        #self.get_logger().info(text)
 
                 if not self.read:
                     continue
@@ -122,11 +127,17 @@ class VoiceRecognition(Node):
                         command.data = text
                         self.pub_text.publish(command)
                     
-    
-def main(args=None):
+
+
+def main_threshold_mode():
+    rclpy.init()
+    voice = VoiceRecognition()
+    voice.run() 
+
+
+def main_button_mode(args=None):
     rclpy.init(args=args)
     voice = VoiceRecognition()
-    # voice.run() 
 
     try:
         thread = threading.Thread(target=voice.run)
@@ -137,6 +148,13 @@ def main(args=None):
     finally:
         voice.destroy_node()
         rclpy.shutdown()
+            
 
 if __name__ == "__main__":
-        main()
+        # main()
+    # Please set "threshold_mode" to "True" if you use threshold.
+    threshold_mode = True
+    if threshold_mode:
+        main_threshold_mode()
+    else:
+        main_button_mode()
