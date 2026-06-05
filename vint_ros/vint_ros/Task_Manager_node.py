@@ -71,6 +71,7 @@ class TaskManager(Node):
         self.dock_query_criter= "Object" # "Object&Side" How to consider both criterias with the LLM?
         self._lock=threading.Lock()
         self.class_id =None
+        self.tout_event =  threading.Event() # Timeout event during action 
         # --- Action---
         self._nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
         #---- VoiceConfirmation action in 2nd thread ----
@@ -85,7 +86,6 @@ class TaskManager(Node):
         #self._cli_group = MutuallyExclusiveCallbackGroup()
 
         self.is_pcl_set = False
-        self._lock_pcl = threading.Lock()
         self.set_params_cli_pcl = self.create_client(SetParameters,
                                                      "/tracker_with_cloud_node/set_parameters")    
         while not self.set_params_cli_pcl.wait_for_service(timeout_sec=2.0):
@@ -93,7 +93,6 @@ class TaskManager(Node):
         self.get_logger().info("'tracker_with_cloud_node' service client ready!")
 
         self.is_perc_set = False
-        self._lock_perc = threading.Lock()
         self.set_params_cli_perc = self.create_client(SetParameters,
                                                       "/plane_cloud_processor_node/set_parameters")
         while not self.set_params_cli_perc.wait_for_service(timeout_sec=2.0):
@@ -119,7 +118,6 @@ class TaskManager(Node):
         self.get_logger().info(f"LLM connected via {self.source}")
            
     def execute_callback(self, goal_handle):
-        self.timeout_flag = False
         with self._lock:
             self.is_LLM_enabled = False
         self.get_logger().info("VoiceConfirmation action started.")
@@ -144,24 +142,30 @@ class TaskManager(Node):
         subprocess.run(['aplay','-D','hw:0,3','-f','S16_LE','-r','44100','-c','2','-d','1','/dev/zero'])
         subprocess.run(['aplay',audio_file])
 
+        self.tout_event.clear()
+
         def timeout_callback():
-            self.timeout_flag = True
+            self.tout_event.set()
             self.get_logger().info("VoiceConfirmation action timed out.")
+
         timer = self.create_timer(duration, timeout_callback)
 
-        while not self.timeout_flag:
-            if any([word in self.text for word in key_words]):
+        while not self.tout_event.is_set():
+            with self._lock:
+                is_kword_in = [word in self.text for word in key_words]
+            if any(is_kword_in):
                 self.get_logger().info(f"VoiceConfirmation action succeeded with text: {self.text}")
                 goal_handle.succeed()
                 break
         timer.cancel()
 
-        if self.timeout_flag:
+        if self.tout_event.is_set():
             goal_handle.abort()
+
+        self.tout_event.clear()
 
         with self._lock:
             self.is_LLM_enabled = True
-            self.timeout_flag = False
             self.text=""
         return VoiceConfirmation.Result()
 
@@ -190,10 +194,11 @@ class TaskManager(Node):
                 self.text=""
                 return     
             LLM_used = self.is_LLM_enabled
+
         if not LLM_used:
             return
         
-        #Predefining which dockink modality to use 
+        #Predefining which docking modality to use 
         if self.dock_query_criter == "Object":
             on_command_update=self.on_command_update_obj
         else:
@@ -202,13 +207,15 @@ class TaskManager(Node):
         # first time => always process
         if not self.cmd_received_once:
             self.cmd_received_once = True
-            self.cmd_last = self.text
-            on_command_update(self.text)
+            with self._lock:
+                self.cmd_last = self.text
+            on_command_update(self.cmd_last)
             return
         # changed => process
         if self.text != self.cmd_last:
-            self.cmd_last = self.text
-            on_command_update(self.text)
+            with self._lock:
+                self.cmd_last = self.text
+            on_command_update(self.cmd_last)
 
 
     def on_edge_update(self, edge_text: str):
@@ -356,7 +363,8 @@ class TaskManager(Node):
         def param_callback(future):
             if future.result() is not None:
                 self.get_logger().info(f"{name} parameter was succesfully set to {value}.")
-                setattr(self, flag_attr, True) 
+                with self._lock:
+                    setattr(self, flag_attr, True) 
                 self.send_goal_attempt()
             else:
                 self.get_logger().error(f"Failed to set {name} parameter. Shutting down.")
@@ -368,14 +376,14 @@ class TaskManager(Node):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
     def send_goal_attempt(self):
-        if not self.is_pcl_set  or not self.is_perc_set:
-            self.get_logger().warn("Not all prerequisites are met.")
-            return
- 
-        self.is_pcl_set= False
-        self.is_perc_set= False
+        with self._lock:
+            if not self.is_pcl_set  or not self.is_perc_set:
+                self.get_logger().warn("Not all prerequisites are met.")
+                return
+    
+            self.is_pcl_set= False
+            self.is_perc_set= False
 
         bt_path = os.path.join(pkg_bts_path,bt_handlr[self.class_id])
 
