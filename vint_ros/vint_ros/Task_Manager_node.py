@@ -35,10 +35,11 @@ import time
 pkg_path = get_package_share_directory('vint_ros')
 pkg_bts_path = os.path.join(get_package_share_directory('bts'),'behavior_trees')
 API_PATH = os.path.join(pkg_path,'conf/conf.yaml')
-YOLO_PATH = os.path.join(pkg_path,'others/YOLO11_labels.yaml')
+YOLO_PATH = os.path.join(pkg_path,'others/YOLO_objects.yaml')
 PROMPT_PATH = os.path.join(pkg_path,'others/prompts.yaml')
 BT_PATH = os.path.join(pkg_path,'others/bts.yaml')
-AUDIO_PATH = os.path.join(pkg_path,'others/audio_samples/eng/')
+AUDIO_PATH = os.path.join(pkg_path,'others/audio_samples/')
+
 
 with open(API_PATH, "r") as f:
     conf_handlr= yaml.safe_load(f)
@@ -46,13 +47,11 @@ with open(API_PATH, "r") as f:
     API_KEY_OR = conf_handlr["key_or"]
 
 with open(YOLO_PATH, "r") as f:
-    yolo_labels= yaml.safe_load(f)
+    yolo_class_handlr= yaml.safe_load(f)
 
 with open(PROMPT_PATH, "r") as f:
     prompt_handlr= yaml.safe_load(f)
 
-with open(BT_PATH, "r") as f:
-    bt_handlr= yaml.safe_load(f)
 
 
 class TaskManager(Node):
@@ -72,6 +71,8 @@ class TaskManager(Node):
         self._lock=threading.Lock()
         self.class_id =None
         self.tout_event =  threading.Event() # Timeout event during action 
+        self.lang = "eng"
+        self.yolo_labs = [yolo_class_handlr[key]["class_label"][self.lang] for key in list(list(yolo_class_handlr.keys()))]
         # --- Action---
         self._nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
         #---- VoiceConfirmation action in 2nd thread ----
@@ -120,27 +121,41 @@ class TaskManager(Node):
     def execute_callback(self, goal_handle):
         with self._lock:
             self.is_LLM_enabled = False
+            target_labs = self.yolo_labs
+            lang = self.lang
         self.get_logger().info("VoiceConfirmation action started.")
-        request = goal_handle.request.request
+
+        try:
+            target_lab , stask  = goal_handle.request.request.split("_")
+        except ValueError:
+            self.get_logger().warn(f"Wrong request format   : {goal_handle.request.request}")
+            self.is_LLM_enabled = True
+            goal_handle.abort()
+            return VoiceConfirmation.Result()
+
+        target_id = next(k for k, v in yolo_class_handlr.items() if v["class_label"][lang] == target_lab)
         duration = goal_handle.request.duration
 
-        if request =="OpenDoor":
-            key_words = ["open", "door"]
-            audio_file= AUDIO_PATH + "OpenDoor.wav"
-        elif request=="GetFood":
-            key_words = ["get", "food"]
-            audio_file= AUDIO_PATH + "GetFood.wav"
-        elif request=="CloseDoor":
-            key_words = ["close", "door"]
-            audio_file= AUDIO_PATH + "CloseDoor.wav"
-        else:
-            self.get_logger().warn(f"Unknown request received in action: {request}")
+        try:
+            audio_file = os.path.join(AUDIO_PATH ,
+                                      lang ,
+                                      yolo_class_handlr[target_id]["subcommands"][stask][lang]["file"]
+                                      )
+            key_words  = yolo_class_handlr[target_id]["subcommands"][stask][lang]["ans_kwords"]
+        except KeyError as e:
+            self.get_logger().warn(f"Unknown field: {e}")
+            self.is_LLM_enabled = True
+            goal_handle.abort()
+            return VoiceConfirmation.Result()
+        except TypeError:
+            self.get_logger().warn(f"{e}")
+            self.is_LLM_enabled = True
             goal_handle.abort()
             return VoiceConfirmation.Result()
 
         subprocess.run(['pulseaudio','--start'])
         subprocess.run(['aplay','-D','hw:0,3','-f','S16_LE','-r','44100','-c','2','-d','1','/dev/zero'])
-        subprocess.run(['aplay',audio_file])
+        subprocess.run(['aplay', audio_file])
 
         self.tout_event.clear()
 
@@ -270,16 +285,19 @@ class TaskManager(Node):
     def on_command_update_obj(self, command_text: str):
 
         self.get_logger().info(f"received command for obj docking: {command_text}")
-        class_check = [class_ in command_text for class_ in yolo_labels.values()]
+
+        class_check = [class_ in command_text for class_ in self.yolo_labs]
         time.sleep(0.05)
 
         if any(class_check):
-            self.class_id = [class_ in command_text for class_ in yolo_labels.values()].index(True)
-    
-            self.get_logger().info(f"Selected target: {list(yolo_labels.values())[self.class_id]}")
+            with self._lock:
+                self.class_id= class_check.index(True)
+            class_label= yolo_class_handlr[self.class_id]["class_label"][self.lang]
+            
+            self.get_logger().info(f"Selected target: {class_label}")
 
             self.set_param("GOAL",
-                           str(self.class_id) , 
+                           str(self.class_id), 
                            self.set_params_cli_pcl , 
                            "is_pcl_set")
 
@@ -385,7 +403,12 @@ class TaskManager(Node):
             self.is_pcl_set= False
             self.is_perc_set= False
 
-        bt_path = os.path.join(pkg_bts_path,bt_handlr[self.class_id])
+            bt_xml = yolo_class_handlr[self.class_id]["bt_xml"]
+        if bt_xml is None:
+            self.get_logger().warn(f"No bt_xml defined for class {self.class_id}")
+            return
+
+        bt_path = os.path.join(pkg_bts_path , bt_xml)
 
         self.get_logger().info("Sending goal attempt...")
         # Send the goal to the action server

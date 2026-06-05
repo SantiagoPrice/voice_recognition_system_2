@@ -1,0 +1,592 @@
+0:
+  class_label:
+    eng: "person"
+    jpn: "人"
+  bt_xml: None
+  subcommands: None
+
+1:
+  class_label:
+    eng: "bicycle"
+    jpn: "自転車"
+  bt_xml: None
+  subcommands: None
+
+2:
+  class_label:
+    eng: "car"
+    jpn: "車"
+  bt_xml: None
+  subcommands: None
+
+3:
+  class_label:
+    eng: "motorcycle"
+    jpn: "バイク"
+  bt_xml: None
+  subcommands: None
+
+4:
+  class_label:
+    eng: "airplane"
+    jpn: "飛行機"
+  bt_xml: None
+  subcommands: None
+
+5:
+  class_label:
+    eng: "bus"
+    jpn: "バス"
+  bt_xml: None
+  subcommands: None
+
+6:
+  class_label:
+    eng: "train"
+    jpn: "電車"
+  bt_xml: None
+  subcommands: None
+
+7:
+  class_label:
+    eng: "truck"
+    jpn: "トラック"
+  bt_xml: None
+  subcommands: None
+
+8:
+  class_label:
+    eng: "boat"
+    jpn: "ボート"
+  bt_xml: None
+  subcommands: None
+
+9:
+  class_label:
+    eng: "traffic light"
+    jpn: "信号機"
+  bt_xml: None
+  subcommands: None
+
+10:
+  class_label:
+    eng: "fire hydrant"
+    jpn: "消火栓"
+  bt_xml: None
+  subcommands: None
+
+11:
+  class_label:
+    eng: "stop sign"
+    jpn: "一時停止標識"
+  bt_xml: None
+  subcommands: None
+
+12:
+  class_label:
+    eng: "parking meter"
+    jpn: "パーキングメーター"
+  bt_xml: None
+  subcommands: None
+
+13:
+  class_label:
+    eng: "bench"
+    jpn: "ベンチ"
+  bt_xml: None
+  subcommands: None
+
+14:
+  class_label:
+    eng: "bird"
+    jpn: "鳥"
+  bt_xml: None
+  subcommands: None
+
+15:
+  class_label:
+    eng: "cat"
+    jpn: "猫"
+  bt_xml: None
+  subcommands: None
+
+16:
+  class_label:
+    eng: "dog"
+    jpn: "犬"
+  bt_xml: None
+  subcommands: None
+
+17:
+  class_label:
+    eng: "horse"
+    jpn: "馬"
+  bt_xml: None
+  subcommands: None
+
+18:
+  class_label:
+    eng: "sheep"
+    jpn: "羊"
+  bt_xml: None
+  subcommands: None
+
+19:
+  class_label:
+    eng: "cow"
+    jpn: "牛"
+  bt_xml: None
+  subcommands: None
+
+20:
+  class_label:
+    eng: "elephant"
+    jpn: "象"
+  bt_xml: None
+  subcommands: None
+
+21:
+  class_label:
+    eng: "bear"
+    jpn: "熊"
+  bt_xml: None
+  subcommands: None
+
+22:
+  class_label:
+    eng: "zebra"
+    jpn: "シマウマ"
+  bt_xml: None
+  subcommands: None
+
+23:
+  class_label:
+    eng: "giraffe"
+    jpn: "キリン"
+  bt_xml: None
+  subcommands: None
+
+24:
+  class_label:
+    eng: "backpack"
+    jpn: "リュックサック"
+  bt_xml: None
+  subcommands: None
+
+25:
+  class_label:
+    eng: "umbrella"
+    jpn: "傘"
+  bt_xml: None
+  subcommands: None
+
+26:
+  class_label:
+    eng: "handbag"
+    jpn: "ハンドバッグ"
+  bt_xml: None
+  subcommands: None
+
+27:
+  class_label:
+    eng: "tie"
+    jpn: "ネクタイ"
+  bt_xml: None
+  subcommands: None
+
+28:
+  class_label:
+    eng: "suitcase"
+    jpn: "スーツケース"
+  bt_xml: None
+  subcommands: None
+
+29:
+  class_label:
+    eng: "frisbee"
+    jpn: "フリスビー"
+  bt_xml: None
+  subcommands: None
+
+30:
+  class_label:
+    eng: "skis"
+    jpn: "スキー"
+  bt_xml: None
+  subcommands: None
+
+31:
+  class_label:
+    eng: "snowboard"
+    jpn: "スノーボード"
+  bt_xml: None
+  subcommands: None
+
+32:
+  class_label:
+    eng: "sports ball"
+    jpn: "ボール"
+  bt_xml: None
+  subcommands: None
+
+33:
+  class_label:
+    eng: "kite"
+    jpn: "凧"
+  bt_xml: None
+  subcommands: None
+
+34:
+  class_label:
+    eng: "baseball bat"
+    jpn: "野球バット"
+  bt_xml: None
+  subcommands: None
+
+35:
+  class_label:
+    eng: "baseball glove"
+    jpn: "野球グローブ"
+  bt_xml: None
+  subcommands: None
+
+36:
+  class_label:
+    eng: "skateboard"
+    jpn: "スケートボード"
+  bt_xml: None
+  subcommands: None
+
+37:
+  class_label:
+    eng: "surfboard"
+    jpn: "サーフボード"
+  bt_xml: None
+  subcommands: None
+
+38:
+  class_label:
+    eng: "tennis racket"
+    jpn: "テニスラケット"
+  bt_xml: None
+  subcommands: None
+
+39:
+  class_label:
+    eng: "bottle"
+    jpn: "瓶"
+  bt_xml: None
+  subcommands: None
+
+40:
+  class_label:
+    eng: "wine glass"
+    jpn: "ワイングラス"
+  bt_xml: None
+  subcommands: None
+
+41:
+  class_label:
+    eng: "cup"
+    jpn: "カップ"
+  bt_xml: None
+  subcommands: None
+
+42:
+  class_label:
+    eng: "fork"
+    jpn: "フォーク"
+  bt_xml: None
+  subcommands: None
+
+43:
+  class_label:
+    eng: "knife"
+    jpn: "ナイフ"
+  bt_xml: None
+  subcommands: None
+
+44:
+  class_label:
+    eng: "spoon"
+    jpn: "スプーン"
+  bt_xml: None
+  subcommands: None
+
+45:
+  class_label:
+    eng: "bowl"
+    jpn: "ボウル"
+  bt_xml: None
+  subcommands: None
+
+46:
+  class_label:
+    eng: "banana"
+    jpn: "バナナ"
+  bt_xml: None
+  subcommands: None
+
+47:
+  class_label:
+    eng: "apple"
+    jpn: "りんご"
+  bt_xml: None
+  subcommands: None
+
+48:
+  class_label:
+    eng: "sandwich"
+    jpn: "サンドイッチ"
+  bt_xml: None
+  subcommands: None
+
+49:
+  class_label:
+    eng: "orange"
+    jpn: "オレンジ"
+  bt_xml: None
+  subcommands: None
+
+50:
+  class_label:
+    eng: "broccoli"
+    jpn: "ブロッコリー"
+  bt_xml: None
+  subcommands: None
+
+51:
+  class_label:
+    eng: "carrot"
+    jpn: "にんじん"
+  bt_xml: None
+  subcommands: None
+
+52:
+  class_label:
+    eng: "hot dog"
+    jpn: "ホットドッグ"
+  bt_xml: None
+  subcommands: None
+
+53:
+  class_label:
+    eng: "pizza"
+    jpn: "ピザ"
+  bt_xml: None
+  subcommands: None
+
+54:
+  class_label:
+    eng: "donut"
+    jpn: "ドーナツ"
+  bt_xml: None
+  subcommands: None
+
+55:
+  class_label:
+    eng: "cake"
+    jpn: "ケーキ"
+  bt_xml: None
+  subcommands: None
+
+56:
+  class_label:
+    eng: "chair"
+    jpn: "椅子"
+  bt_xml: None
+  subcommands: None
+
+57:
+  class_label:
+    eng: "couch"
+    jpn: "ソファ"
+  bt_xml: None
+  subcommands: None
+
+58:
+  class_label:
+    eng: "potted plant"
+    jpn: "鉢植え"
+  bt_xml: None
+  subcommands: None
+
+59:
+  class_label:
+    eng: "bed"
+    jpn: "ベッド"
+  bt_xml: "table_approach.xml"
+  subcommands: None
+
+60:
+  class_label:
+    eng: "table"
+    jpn: "テーブル"
+  bt_xml: "table_approach.xml"
+  subcommands: None
+
+61:
+  class_label:
+    eng: "toilet"
+    jpn: "トイレ"
+  bt_xml: None
+  subcommands: None
+
+62:
+  class_label:
+    eng: "tv"
+    jpn: "テレビ"
+  bt_xml: None
+  subcommands: None
+
+63:
+  class_label:
+    eng: "laptop"
+    jpn: "ノートパソコン"
+  bt_xml: None
+  subcommands: None
+
+64:
+  class_label:
+    eng: "mouse"
+    jpn: "マウス"
+  bt_xml: None
+  subcommands: None
+
+65:
+  class_label:
+    eng: "remote"
+    jpn: "リモコン"
+  bt_xml: None
+  subcommands: None
+
+66:
+  class_label:
+    eng: "keyboard"
+    jpn: "キーボード"
+  bt_xml: None
+  subcommands: None
+
+67:
+  class_label:
+    eng: "cell phone"
+    jpn: "携帯電話"
+  bt_xml: None
+  subcommands: None
+
+68:
+  class_label:
+    eng: "microwave"
+    jpn: "電子レンジ"
+  bt_xml: None
+  subcommands: None
+
+69:
+  class_label:
+    eng: "oven"
+    jpn: "オーブン"
+  bt_xml: None
+  subcommands: None
+
+70:
+  class_label:
+    eng: "toaster"
+    jpn: "トースター"
+  bt_xml: None
+  subcommands: None
+
+71:
+  class_label:
+    eng: "sink"
+    jpn: "流し台"
+  bt_xml: None
+  subcommands: None
+
+72:
+  class_label:
+    eng: "fridge"
+    jpn: "冷蔵庫"
+  bt_xml: "fridge_approach.xml"
+  subcommands:
+    OpenDoor:
+      eng:
+        file: "OpenDoor.wav"
+        ans_kwords:
+          - "open"
+          - "door"
+      jpn:
+        file: "OpenDoor.wav"
+        ans_kwords:
+          - "ドア"
+          - "開"
+    GetFood:
+      eng:
+        file: "GetFood.wav"
+        ans_kwords:
+          - "get"
+          - "food"
+      jpn:
+        file: "GetFood.wav"
+        ans_kwords:
+          - "取"
+          - "とり"
+    CloseDoor:
+      eng:
+        file: "CloseDoor.wav"
+        ans_kwords:
+          - "close"
+          - "door"
+      jpn:
+        file: "CloseDoor.wav"
+        ans_kwords:
+          - "ドア"
+          - "閉"
+
+73:
+  class_label:
+    eng: "book"
+    jpn: "本"
+  bt_xml: None
+  subcommands: None
+
+74:
+  class_label:
+    eng: "clock"
+    jpn: "時計"
+  bt_xml: None
+  subcommands: None
+
+75:
+  class_label:
+    eng: "vase"
+    jpn: "花瓶"
+  bt_xml: None
+  subcommands: None
+
+76:
+  class_label:
+    eng: "scissors"
+    jpn: "ハサミ"
+  bt_xml: None
+  subcommands: None
+
+77:
+  class_label:
+    eng: "teddy bear"
+    jpn: "ぬいぐるみ"
+  bt_xml: None
+  subcommands: None
+
+78:
+  class_label:
+    eng: "hair drier"
+    jpn: "ドライヤー"
+  bt_xml: None
+  subcommands: None
+
+79:
+  class_label:
+    eng: "toothbrush"
+    jpn: "歯ブラシ"
+  bt_xml: None
+  subcommands: None
