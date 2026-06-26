@@ -3,7 +3,7 @@
 <package format="3">
   <name>vint_ros</name>
   <version>0.0.0</version>
-  <description>A ROS2 package for voice recognition using Vosk and sound device integration.</description>
+  <description>A ROS2 package for voice recognition using vosk and sound device integration.</description>
   <maintainer email="makino@ai.iit.tsukuba.ac.jp">orin</maintainer>
   <license>Apache-2.0</license>
 
