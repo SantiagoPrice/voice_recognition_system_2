@@ -229,8 +229,8 @@ class TaskManager(Node):
         # changed => process
         if self.text != self.cmd_last:
             with self._lock:
-                self.cmd_last = self.text
-            on_command_update(self.cmd_last)
+                self.cmd_last = None #self.text
+            on_command_update(self.text)
 
 
     def on_edge_update(self, edge_text: str):
@@ -409,11 +409,24 @@ class TaskManager(Node):
             return
 
         bt_path = os.path.join(pkg_bts_path , bt_xml)
+        
+        # Hardcoded goal pose
+        pose=PoseStamped()
+        pose.header.frame_id = "map"
+        pose.pose.position.x = 0.015
+        pose.pose.position.y = 0.398
+        pose.pose.position.z = 0.0
+        pose.pose.orientation.x = 0.0
+        pose.pose.orientation.y = 0.0
+        pose.pose.orientation.z = -0.192
+        pose.pose.orientation.w = 0.981
+
 
         self.get_logger().info("Sending goal attempt...")
         # Send the goal to the action server
         goal = NavigateToPose.Goal()
         goal.behavior_tree = bt_path
+        goal.pose = pose
         self._nav_client.send_goal_async(goal)
 
     def create_arrow_marker(self, name, frame_id="map"):
