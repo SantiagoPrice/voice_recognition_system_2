@@ -415,14 +415,14 @@
   class_label:
     eng: "bed"
     jpn: "ベッド"
-  bt_xml: "table_approach.xml"
+  bt_xml: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml"
   subcommands: None
 
 60:
   class_label:
     eng: "table"
     jpn: "テーブル"
-  bt_xml: "table_approach.xml"
+  bt_xml: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml"
   subcommands: None
 
 61:
@@ -436,7 +436,7 @@
   class_label:
     eng: "tv"
     jpn: "テレビ"
-  bt_xml: None
+  bt_xml: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml"
   subcommands: None
 
 63:
@@ -506,7 +506,7 @@
   class_label:
     eng: "fridge"
     jpn: "冷蔵庫"
-  bt_xml: "fridge_approach.xml"
+  bt_xml: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml" #"fridge_approach.xml"
   subcommands:
     OpenDoor:
       eng:
