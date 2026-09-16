@@ -23,6 +23,7 @@ install(PROGRAMS
   vint_ros/Task_Manager_node.py
   vint_ros/Goal_to_Nav2_node.py
   vint_ros/phase1_trig_vint.py
+  vint_ros/LLM_wrapper_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
