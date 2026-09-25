@@ -19,6 +19,7 @@
   <exec_depend>rclpy</exec_depend>
   <exec_depend>vosk</exec_depend>
   <exec_depend>sounddevice</exec_depend>
+  <depend>bob_moondream_msgs</depend>
   
   <export>
     <build_type>ament_cmake</build_type>
