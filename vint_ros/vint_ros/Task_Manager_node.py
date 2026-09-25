@@ -19,7 +19,8 @@ from rclpy.node import Node
 from rclpy.action import ActionServer
 from rclpy.callback_groups import ReentrantCallbackGroup , MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
-from rcl_interfaces.srv import SetParameters    
+from rcl_interfaces.srv import SetParameters
+from bob_moondream_msgs.srv import VisualQuery
 from rcl_interfaces.msg import ParameterValue, Parameter as ParameterMsg
 from lifecycle_msgs.srv import ChangeState
 from lifecycle_msgs.msg import Transition
@@ -72,7 +73,9 @@ class TaskManager(Node):
         self.class_id =None
         self.tout_event =  threading.Event() # Timeout event during action 
         self.lang = "eng"
+        self.voice_confirm=False # Enable voice confirmation for every subtask. If False, the robot vlm will decide when the subtask is completed.
         self.yolo_labs = [yolo_class_handlr[key]["class_label"][self.lang] for key in list(list(yolo_class_handlr.keys()))]
+        self.VLM_logger="" # Prior response used to contextualize the next response. It is updated after every VLM query.  
         # --- Action---
         self._nav_client = ActionClient(self, NavigateToPose, 'navigate_to_pose')
         #---- VoiceConfirmation action in 2nd thread ----
@@ -82,7 +85,7 @@ class TaskManager(Node):
                                            'voice_confirmation', 
                                            self.execute_callback,
                                            callback_group=self._act_group)
-
+ 
         #-----  Services -----
         #self._cli_group = MutuallyExclusiveCallbackGroup()
 
@@ -99,6 +102,13 @@ class TaskManager(Node):
         while not self.set_params_cli_perc.wait_for_service(timeout_sec=2.0):
             self.get_logger().info("Waiting for 'plane_cloud_processor_node' service...")
         self.get_logger().info("'plane_cloud_processor_node' service client ready!")
+
+        if not self.voice_confirm:
+            self.im_query_cli = self.create_client(VisualQuery,
+                                                        "/vlm/visual_query")
+            while not self.im_query_cli.wait_for_service(timeout_sec=2.0):
+                self.get_logger().info("Waiting for 'vlm/visual_query' service...")
+            self.get_logger().info("'vlm/visual_query' service client ready!")
 
         # ---- subscriptions ----
         self.sub_edge = self.create_subscription(String, "/edge_list", self.cb_edge, 10)
@@ -125,6 +135,8 @@ class TaskManager(Node):
             lang = self.lang
         self.get_logger().info("VoiceConfirmation action started.")
 
+        # Get the target label and subtask from the request
+
         try:
             target_lab , stask  = goal_handle.request.request.split("_")
         except ValueError:
@@ -136,11 +148,21 @@ class TaskManager(Node):
         target_id = next(k for k, v in yolo_class_handlr.items() if v["class_label"][lang] == target_lab)
         duration = goal_handle.request.duration
 
+
+        # Clear the timeout event before starting the action
+        self.tout_event.clear()
+
+        def timeout_callback():
+            self.tout_event.set()
+            self.get_logger().info("VoiceConfirmation action timed out.")
+
+        # Get the audio file path and keywords for the target label and subtask
+
         try:
             audio_file = os.path.join(AUDIO_PATH ,
-                                      lang ,
-                                      yolo_class_handlr[target_id]["subcommands"][stask][lang]["file"]
-                                      )
+                                    lang ,
+                                    yolo_class_handlr[target_id]["subcommands"][stask][lang]["file"]
+                                    )
             key_words  = yolo_class_handlr[target_id]["subcommands"][stask][lang]["ans_kwords"]
         except KeyError as e:
             self.get_logger().warn(f"Unknown field: {e}")
@@ -157,31 +179,67 @@ class TaskManager(Node):
         subprocess.run(['aplay','-D','hw:0,3','-f','S16_LE','-r','44100','-c','2','-d','1','/dev/zero'])
         subprocess.run(['aplay', audio_file])
 
-        self.tout_event.clear()
-
-        def timeout_callback():
-            self.tout_event.set()
-            self.get_logger().info("VoiceConfirmation action timed out.")
-
+        # Wait for the specified duration or until the keywords are detected
         timer = self.create_timer(duration, timeout_callback)
 
         while not self.tout_event.is_set():
-            with self._lock:
-                is_kword_in = [word in self.text for word in key_words]
-            if any(is_kword_in):
-                self.get_logger().info(f"VoiceConfirmation action succeeded with text: {self.text}")
-                goal_handle.succeed()
-                break
+            if self.voice_confirm:
+                with self._lock:
+                    is_kword_in = [word in self.text for word in key_words]
+                if any(is_kword_in):
+                    self.get_logger().info(f"VoiceConfirmation action succeeded with text: {self.text}")
+                    goal_handle.succeed()
+                    break
+            else:
+                req = VisualQuery.Request()
+                req.prompt = yolo_class_handlr[target_id]["subcommands"][stask]["vlm"]["prompt"]
+                response_event = threading.Event()
+                result_holder = {}
+
+                def _on_response(fut, holder=result_holder, ev=response_event):
+                    holder["response"] = fut.result().response
+                    ev.set()
+
+                future = self.im_query_cli.call_async(req)
+                future.add_done_callback(_on_response)
+
+                # Wait for the response without touching the executor at all.
+                if not response_event.wait(timeout=10.0):
+                    # let the outer timeout_callback / tout_event handle it
+                    continue
+
+                response = result_holder["response"]
+                oper = yolo_class_handlr[target_id]["subcommands"][stask]["vlm"]["compare_last_action"]
+                if oper is not None:
+                    self.get_logger().info(f"Comparing last action with current response: {response.split(',')[-1]} {oper} {self.VLM_logger}")  
+                    cond = eval(f"{response.split(',')[-1]} {oper} {self.VLM_logger}")
+                    self.get_logger().info(f"Comparison result: {cond}")
+                else:
+                    cond = "yes" in future.result().response.lower()
+
+                if cond and not self.tout_event.is_set():
+                    self.get_logger().info(f"VoiceConfirmation action succeeded with image query response: {future.result().response}")
+                    self.VLM_logger = response.split(",")[-1]
+                    goal_handle.succeed()
+                    break
+                else:
+                    self.get_logger().info(f"VoiceConfirmation action failed with image query response: {future.result().response}")
+
+
+
         timer.cancel()
 
         if self.tout_event.is_set():
+            self.VLM_logger = None
             goal_handle.abort()
+            self.get_logger().info("VoiceConfirmation action aborted due to timeout.")
 
         self.tout_event.clear()
 
         with self._lock:
             self.is_LLM_enabled = True
             self.text=""
+        self.get_logger().info("VoiceConfirmation action completed. LLM re-enabled.")
         return VoiceConfirmation.Result()
 
 
@@ -211,6 +269,7 @@ class TaskManager(Node):
             LLM_used = self.is_LLM_enabled
 
         if not LLM_used:
+            self.get_logger().warn("LLM is disabled, command ignored.")
             return
         
         #Predefining which docking modality to use 
@@ -221,7 +280,7 @@ class TaskManager(Node):
 
         # first time => always process
         if not self.cmd_received_once:
-            self.cmd_received_once = True
+            self.cmd_received_once = False # Hardcoded to false
             with self._lock:
                 self.cmd_last = self.text
             on_command_update(self.cmd_last)
