@@ -506,7 +506,7 @@
   class_label:
     eng: "fridge"
     jpn: "冷蔵庫"
-  bt_xml: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml" #"fridge_approach.xml"
+  bt_xml: "fridge_approach.xml" #Open door: "fridge_approach.xml" Non interactive approach: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml"
   subcommands:
     OpenDoor:
       eng:
@@ -519,6 +519,22 @@
         ans_kwords:
           - "ドア"
           - "開"
+      vlm: 
+        prompt: "Yes/no response, is the fridge open?"
+        prompt2: "Yes/no response based on the fridge opening angle. The angle is 0 when the door is closed and 90 when the door is perpendicular to the fridge. Considering the angle, is the door fully open (>90 degrees)?"
+        compare_last_action:
+    AssesFridge:
+      eng:
+        file: "silence.wav"
+        ans_kwords:
+          - "###"
+      jpn:
+        file: "silence.wav"
+        ans_kwords:
+          - "###"
+      vlm: 
+        prompt: "Yes/no and number response in csv format, can you see inside the fridge? How many items are inside the fridge?"
+        compare_last_action:
     GetFood:
       eng:
         file: "GetFood.wav"
@@ -530,6 +546,9 @@
         ans_kwords:
           - "取"
           - "とり"
+      vlm: 
+        prompt: "Number only response, how many items are in the Fridge?"
+        compare_last_action: "!="
     CloseDoor:
       eng:
         file: "CloseDoor.wav"
@@ -541,6 +560,9 @@
         ans_kwords:
           - "ドア"
           - "閉"
+      vlm: 
+        prompt: "Yes/no response based on the fridge opening angle. The angle is 0 when the door is closed and 90 when the door is perpendicular to the fridge. Considering the angle, is the door fully closed (0 degrees)?"
+        compare_last_action:
 
 73:
   class_label:
