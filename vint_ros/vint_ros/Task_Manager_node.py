@@ -133,7 +133,6 @@ class TaskManager(Node):
             self.is_LLM_enabled = False
             target_labs = self.yolo_labs
             lang = self.lang
-        self.get_logger().info("VoiceConfirmation action started.")
 
         # Get the target label and subtask from the request
 
@@ -147,6 +146,8 @@ class TaskManager(Node):
 
         target_id = next(k for k, v in yolo_class_handlr.items() if v["class_label"][lang] == target_lab)
         duration = goal_handle.request.duration
+
+        self.get_logger().info(f"{stask} action started.")
 
 
         # Clear the timeout event before starting the action
@@ -176,11 +177,14 @@ class TaskManager(Node):
             return VoiceConfirmation.Result()
 
         subprocess.run(['pulseaudio','--start'])
-        subprocess.run(['aplay','-D','hw:0,3','-f','S16_LE','-r','44100','-c','2','-d','1','/dev/zero'])
-        subprocess.run(['aplay', audio_file])
+        subprocess.run(['aplay', '-q','-f','S16_LE','-r','44100','-c','2','-d','1','/dev/zero'])
+        subprocess.run(['aplay','-q', audio_file])
 
         # Wait for the specified duration or until the keywords are detected
         timer = self.create_timer(duration, timeout_callback)
+
+        if not self.voice_confirm:
+            self.get_logger().info(f"Query: {yolo_class_handlr[target_id]['subcommands'][stask]['vlm']['prompt']}")
 
         while not self.tout_event.is_set():
             if self.voice_confirm:
@@ -209,21 +213,23 @@ class TaskManager(Node):
                     continue
 
                 response = result_holder["response"]
+                self.get_logger().info(f"VLM response: {response}")
+
                 oper = yolo_class_handlr[target_id]["subcommands"][stask]["vlm"]["compare_last_action"]
                 if oper is not None:
                     self.get_logger().info(f"Comparing last action with current response: {response.split(',')[-1]} {oper} {self.VLM_logger}")  
                     cond = eval(f"{response.split(',')[-1]} {oper} {self.VLM_logger}")
-                    self.get_logger().info(f"Comparison result: {cond}")
                 else:
-                    cond = "yes" in future.result().response.lower()
+                    if req.prompt.split(" ")[0] == "Yes/no":
+                        cond = "yes" in future.result().response.lower()
+                    else:
+                        cond = True  # We assume is number only prompt, any response is valid
 
                 if cond and not self.tout_event.is_set():
-                    self.get_logger().info(f"VoiceConfirmation action succeeded with image query response: {future.result().response}")
+                    self.get_logger().info(f"Action succeeded with VLM response: {future.result().response}")
                     self.VLM_logger = response.split(",")[-1]
                     goal_handle.succeed()
                     break
-                else:
-                    self.get_logger().info(f"VoiceConfirmation action failed with image query response: {future.result().response}")
 
 
 
@@ -239,7 +245,7 @@ class TaskManager(Node):
         with self._lock:
             self.is_LLM_enabled = True
             self.text=""
-        self.get_logger().info("VoiceConfirmation action completed. LLM re-enabled.")
+        # self.get_logger().info("VoiceConfirmation action completed. LLM re-enabled.")
         return VoiceConfirmation.Result()
 
 
