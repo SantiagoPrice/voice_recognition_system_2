@@ -2,6 +2,9 @@
   class_label:
     eng: "person"
     jpn: "人"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -9,6 +12,9 @@
   class_label:
     eng: "bicycle"
     jpn: "自転車"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -16,6 +22,9 @@
   class_label:
     eng: "car"
     jpn: "車"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -23,6 +32,9 @@
   class_label:
     eng: "motorcycle"
     jpn: "バイク"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -30,6 +42,9 @@
   class_label:
     eng: "airplane"
     jpn: "飛行機"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -37,6 +52,9 @@
   class_label:
     eng: "bus"
     jpn: "バス"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -44,6 +62,9 @@
   class_label:
     eng: "train"
     jpn: "電車"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -51,6 +72,9 @@
   class_label:
     eng: "truck"
     jpn: "トラック"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -58,6 +82,9 @@
   class_label:
     eng: "boat"
     jpn: "ボート"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -65,6 +92,9 @@
   class_label:
     eng: "traffic light"
     jpn: "信号機"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -72,6 +102,9 @@
   class_label:
     eng: "fire hydrant"
     jpn: "消火栓"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -79,6 +112,9 @@
   class_label:
     eng: "stop sign"
     jpn: "一時停止標識"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -86,6 +122,9 @@
   class_label:
     eng: "parking meter"
     jpn: "パーキングメーター"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -93,6 +132,9 @@
   class_label:
     eng: "bench"
     jpn: "ベンチ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -100,6 +142,9 @@
   class_label:
     eng: "bird"
     jpn: "鳥"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -107,6 +152,9 @@
   class_label:
     eng: "cat"
     jpn: "猫"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -114,6 +162,9 @@
   class_label:
     eng: "dog"
     jpn: "犬"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -121,6 +172,9 @@
   class_label:
     eng: "horse"
     jpn: "馬"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -128,6 +182,9 @@
   class_label:
     eng: "sheep"
     jpn: "羊"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -135,6 +192,9 @@
   class_label:
     eng: "cow"
     jpn: "牛"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -142,6 +202,9 @@
   class_label:
     eng: "elephant"
     jpn: "象"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -149,6 +212,9 @@
   class_label:
     eng: "bear"
     jpn: "熊"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -156,6 +222,9 @@
   class_label:
     eng: "zebra"
     jpn: "シマウマ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -163,6 +232,9 @@
   class_label:
     eng: "giraffe"
     jpn: "キリン"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -170,6 +242,9 @@
   class_label:
     eng: "backpack"
     jpn: "リュックサック"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -177,6 +252,9 @@
   class_label:
     eng: "umbrella"
     jpn: "傘"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -184,6 +262,9 @@
   class_label:
     eng: "handbag"
     jpn: "ハンドバッグ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -191,6 +272,9 @@
   class_label:
     eng: "tie"
     jpn: "ネクタイ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -198,6 +282,9 @@
   class_label:
     eng: "suitcase"
     jpn: "スーツケース"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -205,6 +292,9 @@
   class_label:
     eng: "frisbee"
     jpn: "フリスビー"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -212,6 +302,9 @@
   class_label:
     eng: "skis"
     jpn: "スキー"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -219,6 +312,9 @@
   class_label:
     eng: "snowboard"
     jpn: "スノーボード"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -226,6 +322,9 @@
   class_label:
     eng: "sports ball"
     jpn: "ボール"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -233,6 +332,9 @@
   class_label:
     eng: "kite"
     jpn: "凧"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -240,6 +342,9 @@
   class_label:
     eng: "baseball bat"
     jpn: "野球バット"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -247,6 +352,9 @@
   class_label:
     eng: "baseball glove"
     jpn: "野球グローブ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -254,6 +362,9 @@
   class_label:
     eng: "skateboard"
     jpn: "スケートボード"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -261,6 +372,9 @@
   class_label:
     eng: "surfboard"
     jpn: "サーフボード"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -268,6 +382,9 @@
   class_label:
     eng: "tennis racket"
     jpn: "テニスラケット"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -275,6 +392,9 @@
   class_label:
     eng: "bottle"
     jpn: "瓶"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -282,6 +402,9 @@
   class_label:
     eng: "wine glass"
     jpn: "ワイングラス"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -289,6 +412,9 @@
   class_label:
     eng: "cup"
     jpn: "カップ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -296,6 +422,9 @@
   class_label:
     eng: "fork"
     jpn: "フォーク"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -303,6 +432,9 @@
   class_label:
     eng: "knife"
     jpn: "ナイフ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -310,6 +442,9 @@
   class_label:
     eng: "spoon"
     jpn: "スプーン"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -317,6 +452,9 @@
   class_label:
     eng: "bowl"
     jpn: "ボウル"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -324,6 +462,9 @@
   class_label:
     eng: "banana"
     jpn: "バナナ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -331,6 +472,9 @@
   class_label:
     eng: "apple"
     jpn: "りんご"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -338,6 +482,9 @@
   class_label:
     eng: "sandwich"
     jpn: "サンドイッチ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -345,6 +492,9 @@
   class_label:
     eng: "orange"
     jpn: "オレンジ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -352,6 +502,9 @@
   class_label:
     eng: "broccoli"
     jpn: "ブロッコリー"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -359,6 +512,9 @@
   class_label:
     eng: "carrot"
     jpn: "にんじん"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -366,6 +522,9 @@
   class_label:
     eng: "hot dog"
     jpn: "ホットドッグ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -373,6 +532,9 @@
   class_label:
     eng: "pizza"
     jpn: "ピザ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -380,6 +542,9 @@
   class_label:
     eng: "donut"
     jpn: "ドーナツ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -387,6 +552,9 @@
   class_label:
     eng: "cake"
     jpn: "ケーキ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -394,6 +562,9 @@
   class_label:
     eng: "chair"
     jpn: "椅子"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -401,6 +572,9 @@
   class_label:
     eng: "couch"
     jpn: "ソファ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -408,6 +582,9 @@
   class_label:
     eng: "potted plant"
     jpn: "鉢植え"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -415,6 +592,9 @@
   class_label:
     eng: "bed"
     jpn: "ベッド"
+  init_pose:
+    t: [1.82, 0.28, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml"
   subcommands: None
 
@@ -422,6 +602,9 @@
   class_label:
     eng: "table"
     jpn: "テーブル"
+  init_pose:
+    t: [0.19, -0.12, 0.0]  # x, y, z translation
+    r: [0.9458, 0.0, 0.0, 0.3245]  # w, x, y, z quaternion (identity)
   bt_xml: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml"
   subcommands: None
 
@@ -429,6 +612,9 @@
   class_label:
     eng: "toilet"
     jpn: "トイレ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -436,6 +622,9 @@
   class_label:
     eng: "tv"
     jpn: "テレビ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml"
   subcommands: None
 
@@ -443,6 +632,9 @@
   class_label:
     eng: "laptop"
     jpn: "ノートパソコン"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -450,6 +642,9 @@
   class_label:
     eng: "mouse"
     jpn: "マウス"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -457,6 +652,9 @@
   class_label:
     eng: "remote"
     jpn: "リモコン"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -464,6 +662,9 @@
   class_label:
     eng: "keyboard"
     jpn: "キーボード"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -471,6 +672,9 @@
   class_label:
     eng: "cell phone"
     jpn: "携帯電話"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -478,6 +682,9 @@
   class_label:
     eng: "microwave"
     jpn: "電子レンジ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -485,6 +692,9 @@
   class_label:
     eng: "oven"
     jpn: "オーブン"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -492,6 +702,9 @@
   class_label:
     eng: "toaster"
     jpn: "トースター"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -499,13 +712,19 @@
   class_label:
     eng: "sink"
     jpn: "流し台"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
 72:
   class_label:
     eng: "fridge"
-    jpn: "冷蔵庫"
+    jpn: "冷蔵"
+  init_pose:
+    t: [1.0, 0.0, 0.0]  # x, y, z translation
+    r: [0.0, 0.0, 0.0, 1.0]  # w, x, y, z quaternion (identity)
   bt_xml: "fridge_approach.xml" #Open door: "fridge_approach.xml" Non interactive approach: "navigate_to_pose_w_replanning_and_recovery_and_target_search.xml"
   subcommands:
     OpenDoor:
@@ -570,6 +789,9 @@
   class_label:
     eng: "book"
     jpn: "本"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -577,6 +799,9 @@
   class_label:
     eng: "clock"
     jpn: "時計"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -584,6 +809,9 @@
   class_label:
     eng: "vase"
     jpn: "花瓶"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -591,6 +819,9 @@
   class_label:
     eng: "scissors"
     jpn: "ハサミ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -598,6 +829,9 @@
   class_label:
     eng: "teddy bear"
     jpn: "ぬいぐるみ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -605,6 +839,9 @@
   class_label:
     eng: "hair drier"
     jpn: "ドライヤー"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None
 
@@ -612,5 +849,8 @@
   class_label:
     eng: "toothbrush"
     jpn: "歯ブラシ"
+  init_pose:
+    t: [0.0, 0.0, 0.0]  # x, y, z translation
+    r: [1.0, 0.0, 0.0, 0.0]  # w, x, y, z quaternion (identity)
   bt_xml: None
   subcommands: None

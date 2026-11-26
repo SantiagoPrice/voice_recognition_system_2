@@ -8,8 +8,7 @@ import math
 from geometry_msgs.msg import PoseStamped
 from ament_index_python.packages import get_package_share_directory
 from visualization_msgs.msg import Marker
-from std_msgs.msg import String
-from std_msgs.msg import Empty
+from std_msgs.msg import String , UInt8MultiArray , Empty
 import ast
 import re
 import yaml
@@ -30,22 +29,29 @@ from rclpy.action import ActionClient
 import threading
 import subprocess
 import time
+import sounddevice as sd
+import soundfile as sf
+from std_srvs.srv import Trigger
 
 
 
 pkg_path = get_package_share_directory('vint_ros')
 pkg_bts_path = os.path.join(get_package_share_directory('bts'),'behavior_trees')
-API_PATH = os.path.join(pkg_path,'conf/conf.yaml')
+CONF_PATH = os.path.join(pkg_path,'conf/conf.yaml')
 YOLO_PATH = os.path.join(pkg_path,'others/YOLO_objects.yaml')
 PROMPT_PATH = os.path.join(pkg_path,'others/prompts.yaml')
 BT_PATH = os.path.join(pkg_path,'others/bts.yaml')
 AUDIO_PATH = os.path.join(pkg_path,'others/audio_samples/')
 
 
-with open(API_PATH, "r") as f:
+with open(CONF_PATH, "r") as f:
     conf_handlr= yaml.safe_load(f)
     API_KEY = ' '
     API_KEY_OR = conf_handlr["key_or"]
+    OUT_VOL = conf_handlr["output_vol"]
+    IN_STD = conf_handlr["input_dev"]
+    OUT_STD = conf_handlr["output_dev"]
+    USE_VLM= conf_handlr["use_VLM"]
 
 with open(YOLO_PATH, "r") as f:
     yolo_class_handlr= yaml.safe_load(f)
@@ -58,6 +64,11 @@ with open(PROMPT_PATH, "r") as f:
 class TaskManager(Node):
     def __init__(self):
         super().__init__("task_manager")
+        subprocess.run(["amixer", "-c", "2", "scontrols"], capture_output=True, text=True)
+        subprocess.run(["amixer", "-c", "2", "sget", "PCM"], capture_output=True, text=True)
+        subprocess.run(["amixer", "-c", "2", "sset", "PCM", f"{OUT_VOL}%"])
+        # --- Parameters---
+        self.is_pressed_button = False
         self.goal_num = None
         self.goal_received_once = False
         self.edges = None 
@@ -72,8 +83,8 @@ class TaskManager(Node):
         self._lock=threading.Lock()
         self.class_id =None
         self.tout_event =  threading.Event() # Timeout event during action 
-        self.lang = "eng"
-        self.voice_confirm=False # Enable voice confirmation for every subtask. If False, the robot vlm will decide when the subtask is completed.
+        self.lang = "jpn"
+        self.voice_confirm= not USE_VLM # Enable voice confirmation for every subtask. If False, the robot vlm will decide when the subtask is completed.
         self.yolo_labs = [yolo_class_handlr[key]["class_label"][self.lang] for key in list(list(yolo_class_handlr.keys()))]
         self.VLM_logger="" # Prior response used to contextualize the next response. It is updated after every VLM query.  
         # --- Action---
@@ -85,23 +96,27 @@ class TaskManager(Node):
                                            'voice_confirmation', 
                                            self.execute_callback,
                                            callback_group=self._act_group)
+
+        sd.default.device = (IN_STD,OUT_STD)
  
         #-----  Services -----
         #self._cli_group = MutuallyExclusiveCallbackGroup()
 
+        self.but_srv = self.create_service(Trigger,"check_button",self.check_button)
+
         self.is_pcl_set = False
         self.set_params_cli_pcl = self.create_client(SetParameters,
                                                      "/tracker_with_cloud_node/set_parameters")    
-        while not self.set_params_cli_pcl.wait_for_service(timeout_sec=2.0):
-            self.get_logger().info("Waiting for 'tracker_with_cloud_node' service...")
-        self.get_logger().info("'tracker_with_cloud_node' service client ready!")
+        # while not self.set_params_cli_pcl.wait_for_service(timeout_sec=2.0):
+        #     self.get_logger().info("Waiting for 'tracker_with_cloud_node' service...")
+        # self.get_logger().info("'tracker_with_cloud_node' service client ready!")
 
         self.is_perc_set = False
         self.set_params_cli_perc = self.create_client(SetParameters,
                                                       "/plane_cloud_processor_node/set_parameters")
-        while not self.set_params_cli_perc.wait_for_service(timeout_sec=2.0):
-            self.get_logger().info("Waiting for 'plane_cloud_processor_node' service...")
-        self.get_logger().info("'plane_cloud_processor_node' service client ready!")
+        # while not self.set_params_cli_perc.wait_for_service(timeout_sec=2.0):
+        #     self.get_logger().info("Waiting for 'plane_cloud_processor_node' service...")
+        # self.get_logger().info("'plane_cloud_processor_node' service client ready!")
 
         if not self.voice_confirm:
             self.im_query_cli = self.create_client(VisualQuery,
@@ -113,6 +128,7 @@ class TaskManager(Node):
         # ---- subscriptions ----
         self.sub_edge = self.create_subscription(String, "/edge_list", self.cb_edge, 10)
         self.sub_cmd = self.create_subscription(String, "/command", self.cb_command, 10)
+        self.sub_ESP32_but = self.create_subscription(UInt8MultiArray,"/ESP32/raw/stop",self.button_pressed,10)
          
         # ---- publish ---- #
         self.prediction = self.create_publisher(Empty, "/prediction", 10)
@@ -144,7 +160,7 @@ class TaskManager(Node):
             goal_handle.abort()
             return VoiceConfirmation.Result()
 
-        target_id = next(k for k, v in yolo_class_handlr.items() if v["class_label"][lang] == target_lab)
+        target_id = next(k for k, v in yolo_class_handlr.items() if v["class_label"]["eng"] == target_lab)
         duration = goal_handle.request.duration
 
         self.get_logger().info(f"{stask} action started.")
@@ -161,7 +177,8 @@ class TaskManager(Node):
 
         try:
             audio_file = os.path.join(AUDIO_PATH ,
-                                    lang ,
+                                    lang , 
+                                    "48000", 
                                     yolo_class_handlr[target_id]["subcommands"][stask][lang]["file"]
                                     )
             key_words  = yolo_class_handlr[target_id]["subcommands"][stask][lang]["ans_kwords"]
@@ -176,9 +193,9 @@ class TaskManager(Node):
             goal_handle.abort()
             return VoiceConfirmation.Result()
 
-        subprocess.run(['pulseaudio','--start'])
-        subprocess.run(['aplay', '-q','-f','S16_LE','-r','44100','-c','2','-d','1','/dev/zero'])
-        subprocess.run(['aplay','-q', audio_file])
+        data, fs = sf.read(audio_file)
+        sd.play(data, fs)
+        sd.wait()
 
         # Wait for the specified duration or until the keywords are detected
         timer = self.create_timer(duration, timeout_callback)
@@ -248,6 +265,15 @@ class TaskManager(Node):
         # self.get_logger().info("VoiceConfirmation action completed. LLM re-enabled.")
         return VoiceConfirmation.Result()
 
+    def button_pressed(self , msg : UInt8MultiArray):
+        self.is_pressed_button = not self.is_pressed_button
+        self.get_logger().info(f"Button state was switched to  {self.is_pressed_button}")
+
+
+    def check_button(self,request,response):
+        response.success = self.is_pressed_button
+        # self.get_logger().info(f"Button state is {response.success}")
+        return response 
 
     def cb_edge(self, msg: String):
         text = msg.data.strip()
@@ -353,6 +379,11 @@ class TaskManager(Node):
 
         class_check = [class_ in command_text for class_ in self.yolo_labs]
         time.sleep(0.05)
+
+        #erase this
+
+        if not any(class_check):
+            class_check = [class_ in "テーブル" for class_ in self.yolo_labs]
 
         if any(class_check):
             with self._lock:
@@ -474,17 +505,20 @@ class TaskManager(Node):
             return
 
         bt_path = os.path.join(pkg_bts_path , bt_xml)
+
+        r = yolo_class_handlr[self.class_id]["init_pose"]["r"]
+        t= yolo_class_handlr[self.class_id]["init_pose"]["t"]
         
         # Hardcoded goal pose
         pose=PoseStamped()
         pose.header.frame_id = "map"
-        pose.pose.position.x = 0.015
-        pose.pose.position.y = 0.398
-        pose.pose.position.z = 0.0
-        pose.pose.orientation.x = 0.0
-        pose.pose.orientation.y = 0.0
-        pose.pose.orientation.z = -0.192
-        pose.pose.orientation.w = 0.981
+        pose.pose.position.x = t[0]
+        pose.pose.position.y = t[1]
+        pose.pose.position.z = t[2]
+        pose.pose.orientation.w = r[0]
+        pose.pose.orientation.x = r[1]
+        pose.pose.orientation.y = r[2]
+        pose.pose.orientation.z = r[3]
 
 
         self.get_logger().info("Sending goal attempt...")
